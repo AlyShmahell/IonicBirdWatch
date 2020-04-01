@@ -1,2 +1,4 @@
-# IonicBirdWatch
-A Bird Watcher app implemented in Ionic.
+# WildWatch
+A nature watch app implemented in Ionic.
+
+![](docs/map.png)
