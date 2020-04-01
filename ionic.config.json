@@ -1,0 +1,7 @@
+{
+  "name": "WildWatch",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "angular"
+}
