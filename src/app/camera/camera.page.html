@@ -1,0 +1,13 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>camera</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-button (click)="captureImage()">
+    Click Picture
+  </ion-button>
+
+  <img [src]="clickedImage" />
+</ion-content>
