@@ -11,45 +11,58 @@ authorize = Authorize()
 login_manager = LoginManager()
 db = SQLAlchemy()
 
-
-UserGroup = db.Table(
-    'user_group', db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('group_id', db.Integer, db.ForeignKey('groups.id'))
-)
-
-UserRole = db.Table(
-    'user_role', db.Model.metadata,
-    db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
-    db.Column('role_id', db.Integer, db.ForeignKey('roles.id'))
-)
-
-class User(UserMixin, db.Model):
+class Users(UserMixin, db.Model):
     __tablename__ = 'users'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
-    roles = db.relationship('Role', secondary=UserRole)
-    groups = db.relationship('Group', secondary=UserGroup)
+    id       = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False)
+    fullname = db.Column(db.String(100), nullable=False)
+    website  = db.Column(db.String(100))
+    bio      = db.Column(db.String(300))
+    photo    = db.Column(db.LargeBinary(length=(2**32)-1), unique=True)
+    roles    = db.relationship('Roles')
 
 
-class Group(db.Model, RestrictionsMixin):
-    __tablename__ = 'groups'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False, unique=True)
-
-
-class Role(db.Model, AllowancesMixin):
+class Roles(db.Model, AllowancesMixin):
     __tablename__ = 'roles'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), nullable=False, unique=True)
+    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
+    role   = db.Column(db.String(255), nullable=False)
+
+class GPS(object):
+    def __init__(self, lat, lon):
+        self.data = set([lat, lon])
+    def __hash__(self):
+        return hash(",".join([str(x) for x in self.data]))
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.data == other.data
+        return NotImplemented
+
+class WildLife(db.Model):
+    __tablename__ = 'wildlife'
+    id         = db.Column(db.Integer, primary_key=True)
+    userid     = db.Column(db.Integer, db.ForeignKey('users.id'))
+    type       = db.Column(db.String(300), nullable=False)
+    species    = db.Column(db.String(300), nullable=False)
+    notes      = db.Column(db.String(300), nullable=False)
+    location   = db.Column(db.PickleType(GPS), nullable=False)
+    date       = db.Column(db.DateTime(), nullable=False)
+    photo      = db.Column(db.LargeBinary(length=(2**32)-1), unique=True, nullable=False)
+
+class Reports(db.Model):
+    __tablename__ = 'reports'
+    id   = db.Column(db.Integer, primary_key=True)
+    userid     = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    wildlifeid = db.Column(db.Integer, db.ForeignKey('wildlife.id'), nullable=False)
+    code       = db.Column(db.Integer, nullable=False)
+    text       = db.Column(db.String(300), nullable=False)
+    resolved   = db.Column(db.Boolean)
 
 
-@db.event.listens_for(User, "before_insert")
+@db.event.listens_for(Users, "before_insert")
 def insert_order_to_printer(mapper, connection, target):
     pass
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+def get_id(user_id):
+    return Users.query.get(int(user_id))

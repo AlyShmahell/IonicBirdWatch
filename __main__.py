@@ -2,8 +2,8 @@ import os
 from flask import Flask
 from flask_restful import Api
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import User, db, authorize, login_manager
-from routes import Index, Profile, Signin, AddUser, Signout, StaticFile
+from models import db, authorize, login_manager
+from routes import Auth, AuthProfile, AuthProfileCat, AuthProfileDel, AuthWildLife
 
 
 if __name__ == '__main__':
@@ -16,14 +16,12 @@ if __name__ == '__main__':
     authorize.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
-    login_manager.login_view                     = 'signin'
     api = Api(app)
-    api.add_resource(Index,      '/')
-    api.add_resource(Profile,    '/profile')
-    api.add_resource(Signin,     '/signin')
-    api.add_resource(AddUser,    '/adduser')
-    api.add_resource(Signout,    '/signout')
-    api.add_resource(StaticFile, '/static/<string:subdir>/<string:filename>')
+    api.add_resource(Auth,           '/auth')
+    api.add_resource(AuthProfile,    '/auth/profile')
+    api.add_resource(AuthProfileCat, '/auth/profile/<string:category>')
+    api.add_resource(AuthProfileDel, '/auth/profile/<string:userid>')
+    api.add_resource(AuthWildLife,   '/auth/wildlife')
     if not os.path.exists('db.sqlite'):
         with app.app_context():
             db.create_all()
