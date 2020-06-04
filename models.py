@@ -53,7 +53,7 @@ class WildLife(db.Model):
 class Reports(db.Model):
     __tablename__ = 'reports'
     id         = db.Column(db.Integer, primary_key=True)
-    userid     = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=False)
+    userid     = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=True)
     wildlifeid = db.Column(db.Integer, db.ForeignKey('wildlife.id'), nullable=False)
     code       = db.Column(db.Integer, nullable=False)
     text       = db.Column(db.String(300), nullable=False)

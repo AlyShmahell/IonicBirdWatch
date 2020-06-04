@@ -8,8 +8,10 @@ from routes import (Auth,
                     AuthProfileCat, 
                     AuthProfileDel, 
                     AuthWildLife, 
+                    AuthReport,
                     GuestWildLifeMany, 
-                    GuestWildLifeOne)
+                    GuestWildLifeOne,
+                    GuestReport)
 
 
 if __name__ == '__main__':
@@ -27,8 +29,10 @@ if __name__ == '__main__':
     api.add_resource(AuthProfileCat,    '/auth/profile/<string:category>')
     api.add_resource(AuthProfileDel,    '/auth/profile/<string:userid>')
     api.add_resource(AuthWildLife,      '/auth/wildlife')
+    api.add_resource(AuthReport,        '/auth/report/<string:reportid>')
     api.add_resource(GuestWildLifeMany, '/guest/wildlife')
     api.add_resource(GuestWildLifeOne,  '/guest/wildlife/<int:wildlifeid>')
+    api.add_resource(GuestReport,       '/guest/report')
 
     
     if not os.path.exists('db.sqlite'):

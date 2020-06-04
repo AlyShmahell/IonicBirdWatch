@@ -113,14 +113,18 @@ class AuthProfileCat(Resource):
 class AuthProfileDel(Resource):
     @login_required
     def delete(self, userid):
-        value   = request.json.get('value')
         userole = Roles.query.filter_by(id=current_user.id).first() 
         if not userole:
             abort(Response('curator does not exist'))
         if userole.role != 'curator':
             abort(Response('you are not a curator'))
-        user = Users.query.filter_by(id=userid).first() 
+        if userid == current_user.id:
+            abort(Response('curator cannot delete self'))
+        userole = Roles.query.filter_by(id=userid).first() 
+        user    = Users.query.filter_by(id=userid).first() 
         if user:
+            db.session.delete(userole)
+            db.session.commit()
             db.session.delete(user)
             db.session.commit()
             return 200
@@ -200,6 +204,13 @@ class AuthWildLife(Resource):
         if info["text"] != "":
             se = SearchEngine(doc, query=info["text"], theshold=.1)
             wf = [x for (i,x) in enumerate(wf) if i in se]
+        userole = Roles.query.filter_by(id=current_user.id).first() 
+        if userole.role == 'curator':
+            for wfo in wf:
+                reports = Reports.query.filter(Reports.wildlifeid == wfo['id'])\
+                                       .filter(Reports.resolved   != True)
+                reports = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in reports.all()]
+                wfo['reports'] = reports
         return wf, 200
 
 class GuestWildLifeOne(Resource):
@@ -252,3 +263,80 @@ class GuestWildLifeMany(Resource):
         return wf, 200
 
 
+
+class GuestReport(Resource):
+    def post(self):
+        info = {}
+        try:
+            info["code"]       = int(request.json.get('code'))
+            info["text"]       = str(request.json.get('text'))
+            info["wildlifeid"] = int(request.json.get('wildlifeid'))
+        except:
+            abort(Response('wrong report keys'))
+        if any(x 
+               for x in info.values() 
+               if x == None):
+            abort(Response('empty report values'))
+        wildlife = WildLife.query.filter_by(id = info["wildlifeid"]).first()
+        if not wildlife:
+            abort(Response('wildlife does not exist'))
+        new_report = Reports(text=info["text"], 
+                             code=info["code"], 
+                             wildlifeid=info["wildlifeid"],
+                             resolved=False)
+        db.session.add(new_report)
+        db.session.commit()
+        return 200
+
+
+
+class AuthReport(Resource):
+    @login_required
+    def put(self, reportid):
+        userole = Roles.query.filter_by(id=current_user.id).first() 
+        if userole.role != 'curator':
+            abort(Response('not a curator'))
+        reportid = int(reportid)
+        cascade  = bool(request.args.get('cascade')) if request.args.get('cascade') is not None else False
+        report = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).first()
+        if not report:
+            abort(Response('report does not exist'))
+        try:
+            success = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).update({'resolved': True, 'userid': current_user.id})
+            db.session.commit()
+            return 200
+        except:
+            abort(Response('report does not exist'))
+        if cascade:
+            try:
+                reports = Reports.query.filter_by(wildlifeid = report.wildlifeid).update({'resolved': True, 'userid': current_user.id})
+                db.session.commit()
+                return 200
+            except:
+                abort(Response('further reports do not exist'))
+    @login_required
+    def delete(self, reportid):
+        userole = Roles.query.filter_by(id=current_user.id).first() 
+        if userole.role != 'curator':
+            abort(Response('not a curator'))
+        cascade    = bool(request.args.get('cascade')) if request.args.get('cascade') is not None else False
+        report = Reports.query.filter_by(id = reportid).first()
+        wildlifeid = report.wildlifeid
+        try:
+            db.session.delete(report)
+            db.session.commit()
+            return 200
+        except:
+            abort(Response('report does not exist'))
+        if cascade:
+            try:
+                wildlife = WildLife.query.filter_by(id=wildlifeid)
+                db.session.delete(wildlife)
+                db.session.commit()
+                reports = Reports.query.filter_by(wildlifeid = wildlifeid)
+                for report in reports.all():
+                    db.session.delete(report)
+                    db.session.commit()
+                return 200
+            except:
+                abort(Response('report does not exist'))
