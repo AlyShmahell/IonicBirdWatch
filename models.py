@@ -45,7 +45,8 @@ class WildLife(db.Model):
     type       = db.Column(db.String(300), nullable=False)
     species    = db.Column(db.String(300), nullable=False)
     notes      = db.Column(db.String(300), nullable=False)
-    location   = db.Column(db.PickleType(GPS), nullable=False)
+    lat        = db.Column(db.Integer, nullable=False)
+    lon        = db.Column(db.Integer, nullable=False)
     date       = db.Column(db.DateTime(), nullable=False)
     photo      = db.Column(db.LargeBinary(length=(2**32)-1), unique=True, nullable=False)
 

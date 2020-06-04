@@ -1,11 +1,13 @@
-import os
+import os, sys, json
+import datetime
 from flask import render_template, make_response, redirect, url_for, flash, send_from_directory, abort, Response
 from flask_restful import Resource, request
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import Users, Roles, WildLife, Reports, db, login_manager
-
+from sqlalchemy import or_
+from se import SearchEngine
 
 class Auth(Resource):
     def post(self):
@@ -18,7 +20,6 @@ class Auth(Resource):
             assert fullname is not None
             user = Users.query.filter_by(username=username).first() 
             if user:
-                print('user already exists')
                 return 'user already exists'
             new_user = Users(username=username, 
                              fullname=fullname, 
@@ -35,14 +36,10 @@ class Auth(Resource):
             try:
                 assert username is not None
                 assert password is not None
-                print(f"username: {username}, password: {password}")
                 user = Users.query.filter_by(username=username).first() 
                 if not user or not check_password_hash(user.password, password):
-                    print('user does not exists')
                     return 'user does not exists'
-                print(f'logging in: {user.password}')
                 login_user(user, remember=True)
-                print(f'logged in')
                 return 'signed in'
             except:
                 return 'incorrect credential keys'
@@ -129,12 +126,11 @@ class AuthProfileDel(Resource):
 class AuthWildLife(Resource):
     def post(self):
         info = {}
-        print (request.headers, request.form, request.files, request.data, request.json)
         try:
             info["type"]     = request.json.get('type')
             info["species"]  = request.json.get('species')
             info["notes"]    = request.json.get('notes')
-            info["photo"]    = request.json.get('photo')
+            info["photo"]    = request.json.get('photo').encode('utf_8')
             info["date"]     = request.json.get('date')
             info["location"] = request.json.get('location')
         except:
@@ -143,7 +139,7 @@ class AuthWildLife(Resource):
                for x in info.values() 
                if x == None):
             abort(Response('empty wildlife values'))
-        
+        info["date"] = datetime.datetime.strptime(info["date"], '%Y-%m-%d %H:%M:%S.%f')
         userole = Roles.query.filter_by(id=current_user.id).first() 
         if not userole:
             abort(Response('curator does not exist'))
@@ -151,13 +147,15 @@ class AuthWildLife(Resource):
             abort(Response('you are a curator'))
         wildlife = WildLife.query.filter_by(photo=info["photo"]).first() 
         if wildlife:
-            abort(Response('user already exists'))
+            abort(Response('wildlife already exists'))
         new_wildlife = WildLife(type=info["type"], 
                                 species=info["species"], 
                                 notes=info["notes"],
                                 photo=info["photo"], 
                                 date=info["date"], 
-                                location=info["location"])
+                                lat=info["location"]["lat"], 
+                                lon=info["location"]["lon"],
+                                userid=current_user.id)
         db.session.add(new_wildlife)
         db.session.commit()
         return 200
@@ -165,20 +163,37 @@ class AuthWildLife(Resource):
         info = {}
         try:
             info["text"]     = request.args.get('text')
-            info["filters"]  = request.args.get('filters')
-            info["location"] = request.args.get('location')
-            info["area"]     = request.args.get('area')
+            info["filters"]  = json.loads(request.args.get('filters'))
+            info["location"] = json.loads(request.args.get('location'))
+            info["area"]     = int(request.args.get('area'))
         except:
             abort(Response('wrong filter keys'))
         info = {k:v for k, v in info.items() if v is not None}
-        wildlife = WildLife.query.filter_by(WildLife.long < info["location"]['long'] + info["area"])\
-                                 .filter_by(WildLife.long > info["location"]['long'] - info["area"])\
-                                 .filter_by(WildLife.lat  < info["location"]['lat']  + info["area"])\
-                                 .filter_by(WildLife.lat  < info["location"]['lat']  - info["area"])\
-                                 .filter_by(WildLife.date < info["filters"]['maxd'])\
-                                 .filter_by(WildLife.date > info["filters"]['mind'])\
-                                 .filter_by(WildLife.type in info['filters']['type'])
+        info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
+        info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
+        wildlife = WildLife.query.filter(WildLife.lon  <= (info["location"]['lon'] + info["area"]))\
+                                 .filter(WildLife.lon  >= (info["location"]['lon'] - info["area"]))\
+                                 .filter(WildLife.lat  <= (info["location"]['lat'] + info["area"]))\
+                                 .filter(WildLife.lat  >= (info["location"]['lat'] - info["area"]))\
+                                 .filter(WildLife.date <= info["filters"]['maxd'])\
+                                 .filter(WildLife.date >= info["filters"]['mind'])\
+                                 .filter(or_(*[WildLife.type.like(name) for name in info['filters']['type']]))
         if info['filters']['by'] == 'me':
-            wildlife = wildlife.filter_by(id = current_user.id)
-        wildlife = wildlife.all() 
-        return wildlife, 200
+            wildlife = wildlife.filter_by(userid = current_user.id)
+        wildlife = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in wildlife.all()]
+        wf = {}
+        for wfo in wildlife:
+            wfo['date']   = wfo['date'].strftime("%Y-%m-%d %H:%M:%S.%f")
+            wfo['photo']  = wfo['photo'].decode("utf8") 
+            wf[wfo['id']] =  wfo
+        print([*wf.keys()])
+        if info["text"] != "":
+            se = SearchEngine(wf)
+            r = se.cosine_similarity_T(.3, info["text"])
+            print(r)
+            wf = {
+                k:v 
+                for k, v in wf.items()
+                if k in r
+            }
+        return wf, 200
