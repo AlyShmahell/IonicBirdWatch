@@ -8,7 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import Users, Roles, WildLife, Reports, db, login_manager
 from sqlalchemy import or_
 from search import *
-from copy import copy
 
 class Auth(Resource):
     def post(self):
@@ -179,10 +178,12 @@ class AuthWildLife(Resource):
         info = {k:v for k, v in info.items() if v is not None}
         info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
         info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
-        wildlife = WildLife.query.filter(WildLife.lon  <= (info["location"]['lon'] + info["area"]))\
-                                 .filter(WildLife.lon  >= (info["location"]['lon'] - info["area"]))\
-                                 .filter(WildLife.lat  <= (info["location"]['lat'] + info["area"]))\
-                                 .filter(WildLife.lat  >= (info["location"]['lat'] - info["area"]))\
+        wildlife = WildLife.query.filter(
+                                    (
+                                        (WildLife.lon - info["location"]['lon'])*(WildLife.lon - info["location"]['lon']) + 
+                                        (WildLife.lat  - info["location"]['lat'])*(WildLife.lat  - info["location"]['lat'])
+                                    ) <= info["area"]
+                                )\
                                  .filter(WildLife.date <= info["filters"]['maxd'])\
                                  .filter(WildLife.date >= info["filters"]['mind'])\
                                  .filter(or_(*[WildLife.type.like(name) for name in info['filters']['type']]))
@@ -228,10 +229,12 @@ class GuestWildLifeMany(Resource):
         info = {k:v for k, v in info.items() if v is not None}
         info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
         info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
-        wildlife = WildLife.query.filter(WildLife.lon  <= (info["location"]['lon'] + info["area"]))\
-                                 .filter(WildLife.lon  >= (info["location"]['lon'] - info["area"]))\
-                                 .filter(WildLife.lat  <= (info["location"]['lat'] + info["area"]))\
-                                 .filter(WildLife.lat  >= (info["location"]['lat'] - info["area"]))\
+        wildlife = WildLife.query.filter(
+                                    (
+                                        (WildLife.lon - info["location"]['lon'])*(WildLife.lon - info["location"]['lon']) + 
+                                        (WildLife.lat  - info["location"]['lat'])*(WildLife.lat  - info["location"]['lat'])
+                                    ) <= info["area"]
+                                )\
                                  .filter(WildLife.date <= info["filters"]['maxd'])\
                                  .filter(WildLife.date >= info["filters"]['mind'])\
                                  .filter(or_(*[WildLife.type.like(name) for name in info['filters']['type']]))
@@ -247,3 +250,5 @@ class GuestWildLifeMany(Resource):
             se = SearchEngine(doc, query=info["text"], theshold=.1)
             wf = [x for (i,x) in enumerate(wf) if i in se]
         return wf, 200
+
+
