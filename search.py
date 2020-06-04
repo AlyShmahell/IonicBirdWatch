@@ -21,28 +21,22 @@ def WordLemmatizer(data):
     for index,entry in enumerate(data):
         sentence = []
         for word, tag in pos_tag(entry.split(" ")):
+            word  = re.sub("\W+", " ", word).strip()
             if len(word)>1 and word not in stopwords.words('english') and word.isalpha():
-                word_Final = lemmatizer.lemmatize(word,tag_map[tag[0]])
-                sentence.append(word_Final)
+                root = lemmatizer.lemmatize(word,tag_map[tag[0]])
+                sentence.append(root)
         sentence = " ".join(sentence)
-        sentence = re.sub("\[.", '', sentence)
         sentence = re.sub("'",   '', sentence)
-        sentence = re.sub('\]',  '', sentence)
         document.append(sentence)
     return document
 
-documents = ["birds are cool when they are flying", 
-             "birds are cool when they are chirping"]
 
-
-def SearchEngine(documents, query):
+def SearchEngine(documents, query, theshold):
+    query       = re.sub("\W+", " ", query).strip()
     query       = WordLemmatizer([query])
     documents   = WordLemmatizer(documents)
     vectorizer  = TfidfVectorizer()
     docs_tfidf  = vectorizer.fit_transform(documents)
     query_tfidf = vectorizer.transform(query)
     cosim       = cosine_similarity(query_tfidf, docs_tfidf).flatten()
-    return cosim
-
-tf = SearchEngine(documents, query="dogs are chirp to be cool")
-print(tf)
+    return [ i for (i,j) in enumerate(cosim) if j >= theshold ]
