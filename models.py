@@ -1,7 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from flask_login import LoginManager
-
 from flask_authorize import AllowancesMixin, RestrictionsMixin
 from flask_authorize import PermissionsMixin
 from flask_authorize import Authorize
@@ -10,6 +9,15 @@ from flask_authorize import Authorize
 authorize = Authorize()
 login_manager = LoginManager()
 db = SQLAlchemy()
+
+
+UsersRoles = db.Table(
+    'users_roles', db.Model.metadata,
+    db.Column('id', db.Integer, primary_key=True),
+    db.Column('userid', db.Integer, db.ForeignKey('users.id')),
+    db.Column('roleid', db.Integer, db.ForeignKey('roles.id'))
+)
+
 
 class Users(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -20,15 +28,15 @@ class Users(UserMixin, db.Model):
     website  = db.Column(db.String(100))
     bio      = db.Column(db.String(300))
     photo    = db.Column(db.LargeBinary(length=(2**32)-1), unique=True)
-    roles    = db.relationship('Roles')
+    roles    = db.relationship('Roles', secondary=UsersRoles)
 
 
 class Roles(db.Model, AllowancesMixin):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer, db.ForeignKey('users.id'), primary_key=True)
-    role   = db.Column(db.String(255), nullable=False)
+    id     = db.Column(db.Integer, primary_key=True)
+    name   = db.Column(db.String(255), nullable=False)
 
-class GPS(object):
+
+"""class GPS(object):
     def __init__(self, lat, lon):
         self.data = set([lat, lon])
     def __hash__(self):
@@ -36,7 +44,8 @@ class GPS(object):
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             return self.data == other.data
-        return NotImplemented
+        return NotImplemented"""
+
 
 class WildLife(db.Model):
     __tablename__ = 'wildlife'
@@ -50,6 +59,7 @@ class WildLife(db.Model):
     date       = db.Column(db.DateTime(), nullable=False)
     photo      = db.Column(db.LargeBinary(length=(2**32)-1), unique=True, nullable=False)
 
+
 class Reports(db.Model):
     __tablename__ = 'reports'
     id         = db.Column(db.Integer, primary_key=True)
@@ -60,9 +70,10 @@ class Reports(db.Model):
     resolved   = db.Column(db.Boolean)
 
 
-@db.event.listens_for(Users, "before_insert")
+"""@db.event.listens_for(Users, "before_insert")
 def insert_order_to_printer(mapper, connection, target):
-    pass
+    pass"""
+
 
 @login_manager.user_loader
 def get_id(user_id):

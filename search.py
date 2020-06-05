@@ -10,7 +10,8 @@ from   nltk.corpus   import wordnet as wn
 from   collections   import defaultdict
 from   sklearn.feature_extraction.text import TfidfVectorizer
 from   sklearn.metrics.pairwise        import cosine_similarity
- 
+
+
 def WordLemmatizer(data):
     tag_map = defaultdict(lambda : wn.NOUN)
     tag_map['J'] = wn.ADJ
@@ -32,6 +33,12 @@ def WordLemmatizer(data):
 
 
 def SearchEngine(documents, query, theshold):
+    try:
+        assert len(documents) != 0
+        assert all(bool(type(document) == str and len(document.strip()) != 0) for document in documents)
+        assert bool(type(query) == str and len(query.strip()) != 0)
+    except:
+        return [0]
     query       = re.sub("\W+", " ", query).strip()
     query       = WordLemmatizer([query])
     documents   = WordLemmatizer(documents)

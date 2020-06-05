@@ -1,13 +1,28 @@
 import os, sys, json
 import datetime
-from flask import abort, Response
-from flask_restful import Resource, request
+from flask import Response
+from flask_restful import Resource, request, abort
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import Users, Roles, WildLife, Reports, db, login_manager
+from models import Users, Roles, WildLife, Reports, db, login_manager, authorize
 from sqlalchemy import or_
 from search import *
+import functools
+
+
+def has_role(role=None):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if bool(authorize.has_role(role)):
+                value = func(*args, **kwargs)
+                return value
+            else:
+                abort(403, error_message=f"({current_user.fullname} != {role}) => permission denied")
+        return wrapper
+    return decorator
+
 
 class Auth(Resource):
     def post(self):
@@ -20,80 +35,113 @@ class Auth(Resource):
             assert fullname is not None
             user = Users.query.filter_by(username=username).first() 
             if user:
-                return 'user already exists'
+                return Response(
+                response = json.dumps({
+                    "message": "account already exists"
+                    }),
+                status=409,
+                mimetype="application/json"
+            )
             new_user = Users(username=username, 
                              fullname=fullname, 
                              password=generate_password_hash(password, 
                                                             method='sha256'))
             db.session.add(new_user)
             db.session.commit()
-            new_role = Roles(id=new_user.id, 
-                             role='user')
-            db.session.add(new_role)
+            userole = Roles.query.filter_by(name = 'user').first()
+            new_user.roles.append(userole)
             db.session.commit()
-            return 'signed up'
+            return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=201,
+                mimetype="application/json"
+            )
         except:
             try:
                 assert username is not None
                 assert password is not None
                 user = Users.query.filter_by(username=username).first() 
                 if not user or not check_password_hash(user.password, password):
-                    return 'user does not exists'
+                    return Response(
+                response = json.dumps({
+                    "message": "account does not exist"
+                    }),
+                status=404,
+                mimetype="application/json"
+            )
                 login_user(user, remember=True)
-                return 'signed in'
+                return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
             except:
-                return 'incorrect credential keys'
+                return Response(
+                response = json.dumps({
+                    "message": "incorrect credentials"
+                    }),
+                status=401,
+                mimetype="application/json"
+            )
     @login_required
     def delete(self):
         logout_user()
-        return 200
+        return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
 
 
 class AuthProfile(Resource):
     @login_required
+    @has_role('user')
     def get(self):
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if not userole:
-            abort(Response('curator does not exist'))
-        if userole.role == 'curator':
-            abort(Response('you are a curator'))
         user = Users.query.filter_by(username=current_user.username).first() 
         if user:
-            return {'username': user.username, 
+            return Response(
+                response = json.dumps({
+                    "data": {'username': user.username, 
                     'password': user.password, 
                     'fullname': user.fullname,
                     'bio': user.bio,
                     'website': user.website,
-                    'photo': user.photo}, 200
+                    'photo': user.photo}
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
         else:
-            abort(Response('user does not exist'))
+            abort(404, error_message=f"user does not exist")
     @login_required
+    @has_role('user')
     def delete(self):
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if not userole:
-            abort(Response('curator does not exist'))
-        if userole.role == 'curator':
-            abort(Response('you are a curator'))
         user = Users.query.filter_by(username=current_user.username).first() 
         if user:
-            db.session.delete(userole)
-            db.session.commit()
             db.session.delete(user)
             db.session.commit()
             logout_user()
-            return 200
+            return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
         else:
-            abort(Response('user does not exist'))
+            abort(404, error_message=f"user does not exist")
 
 
 class AuthProfileCat(Resource):
     @login_required
+    @has_role('user')
     def put(self, category):
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if not userole:
-            abort(Response('curator does not exist'))
-        if userole.role == 'curator':
-            abort(Response('you are a curator'))
         value = request.json.get('value')
         user = Users.query.filter_by(username=current_user.username).first() 
         mapper = {
@@ -106,34 +154,40 @@ class AuthProfileCat(Resource):
         try:
             success = Users.query.filter_by(username=current_user.username).update({mapper[category]: value})
             db.session.commit()
-            return 200
+            return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
         except:
-            abort(Response('user does not exist'))
+            abort(404, error_message=f"user does not exist")
 
 class AuthProfileDel(Resource):
     @login_required
+    @has_role('curator')
     def delete(self, userid):
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if not userole:
-            abort(Response('curator does not exist'))
-        if userole.role != 'curator':
-            abort(Response('you are not a curator'))
         if userid == current_user.id:
-            abort(Response('curator cannot delete self'))
-        userole = Roles.query.filter_by(id=userid).first() 
+            abort(403, error_message=f"curator cannot delete self")
         user    = Users.query.filter_by(id=userid).first() 
         if user:
-            db.session.delete(userole)
-            db.session.commit()
             db.session.delete(user)
             db.session.commit()
-            return 200
+            return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
         else:
-            abort(Response('id does not exist'))
+            abort(403, error_message=f"user id does not exist")
 
 
 class AuthWildLife(Resource):
     @login_required
+    @has_role('user')
     def post(self):
         info = {}
         try:
@@ -144,20 +198,15 @@ class AuthWildLife(Resource):
             info["date"]     = request.json.get('date')
             info["location"] = request.json.get('location')
         except:
-            abort(Response('wrong wildlife keys'))
+            abort(422, error_message=f"wrong wilflife dictionary keys")
         if any(x 
                for x in info.values() 
                if x == None):
-            abort(Response('empty wildlife values'))
+            abort(422, error_message=f"empty wilflife dictionary values")
         info["date"] = datetime.datetime.strptime(info["date"], '%Y-%m-%d %H:%M:%S.%f')
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if not userole:
-            abort(Response('curator does not exist'))
-        if userole.role == 'curator':
-            abort(Response('you are a curator'))
         wildlife = WildLife.query.filter_by(photo=info["photo"]).first() 
         if wildlife:
-            abort(Response('wildlife already exists'))
+            abort(409, error_message=f"wildlife entry already exists")
         new_wildlife = WildLife(type=info["type"], 
                                 species=info["species"], 
                                 notes=info["notes"],
@@ -168,17 +217,23 @@ class AuthWildLife(Resource):
                                 userid=current_user.id)
         db.session.add(new_wildlife)
         db.session.commit()
-        return 200
+        return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
     @login_required
     def get(self):
         info = {}
         try:
-            info["text"]     = request.args.get('text')
+            info["text"]     = str(request.args.get('text')).strip("\"")
             info["filters"]  = json.loads(request.args.get('filters'))
             info["location"] = json.loads(request.args.get('location'))
             info["area"]     = int(request.args.get('area'))
         except:
-            abort(Response('wrong filter keys'))
+            abort(422, error_message=f"wrong query keys")
         info = {k:v for k, v in info.items() if v is not None}
         info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
         info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
@@ -186,7 +241,7 @@ class AuthWildLife(Resource):
                                     (
                                         (WildLife.lon - info["location"]['lon'])*(WildLife.lon - info["location"]['lon']) + 
                                         (WildLife.lat  - info["location"]['lat'])*(WildLife.lat  - info["location"]['lat'])
-                                    ) <= info["area"]
+                                    ) <= info["area"]**2
                                 )\
                                  .filter(WildLife.date <= info["filters"]['maxd'])\
                                  .filter(WildLife.date >= info["filters"]['mind'])\
@@ -204,14 +259,19 @@ class AuthWildLife(Resource):
         if info["text"] != "":
             se = SearchEngine(doc, query=info["text"], theshold=.1)
             wf = [x for (i,x) in enumerate(wf) if i in se]
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if userole.role == 'curator':
+        if bool(authorize.has_role('curator')):
             for wfo in wf:
                 reports = Reports.query.filter(Reports.wildlifeid == wfo['id'])\
                                        .filter(Reports.resolved   != True)
                 reports = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in reports.all()]
                 wfo['reports'] = reports
-        return wf, 200
+        return Response(
+                response = json.dumps({
+                    "data": wf
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
 
 class GuestWildLifeOne(Resource):
     def get(self, wildlifeid=None):
@@ -221,22 +281,28 @@ class GuestWildLifeOne(Resource):
                 wildlife = {k: v for k,v in vars(wildlife).items() if not k.startswith('_')}
                 wildlife['date']   = wildlife['date'].strftime("%Y-%m-%d %H:%M:%S.%f")
                 wildlife['photo']  = wildlife['photo'].decode("utf8")
-                return wildlife
+                return Response(
+                response = json.dumps({
+                    "data": wildlife
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
             else:
-                abort(Response('wrong wildlife id'))
+                abort(403, error_message=f"wildlife id does not exist")
         else:
-            abort(Response('no wildlife id'))
+            abort(422, error_message=f"no wildlife id provided")
 
 class GuestWildLifeMany(Resource):
     def get(self):
         info = {}
         try:
-            info["text"]     = request.args.get('text')
+            info["text"]     = str(request.args.get('text')).strip("\"")
             info["filters"]  = json.loads(request.args.get('filters'))
             info["location"] = json.loads(request.args.get('location'))
             info["area"]     = int(request.args.get('area'))
         except:
-            abort(Response('wrong filter keys'))
+            abort(422, error_message=f"wrong query keys")
         info = {k:v for k, v in info.items() if v is not None}
         info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
         info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
@@ -244,7 +310,7 @@ class GuestWildLifeMany(Resource):
                                     (
                                         (WildLife.lon - info["location"]['lon'])*(WildLife.lon - info["location"]['lon']) + 
                                         (WildLife.lat  - info["location"]['lat'])*(WildLife.lat  - info["location"]['lat'])
-                                    ) <= info["area"]
+                                    ) <= info["area"]**2
                                 )\
                                  .filter(WildLife.date <= info["filters"]['maxd'])\
                                  .filter(WildLife.date >= info["filters"]['mind'])\
@@ -260,7 +326,13 @@ class GuestWildLifeMany(Resource):
         if info["text"] != "":
             se = SearchEngine(doc, query=info["text"], theshold=.1)
             wf = [x for (i,x) in enumerate(wf) if i in se]
-        return wf, 200
+        return Response(
+                response = json.dumps({
+                    "data": wf
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
 
 
 
@@ -269,74 +341,89 @@ class GuestReport(Resource):
         info = {}
         try:
             info["code"]       = int(request.json.get('code'))
-            info["text"]       = str(request.json.get('text'))
+            info["text"]       = str(request.json.get('text')).strip("\"")
             info["wildlifeid"] = int(request.json.get('wildlifeid'))
         except:
-            abort(Response('wrong report keys'))
+            abort(422, error_message=f"wrong report dictionary keys")
         if any(x 
                for x in info.values() 
                if x == None):
-            abort(Response('empty report values'))
+            abort(422, error_message=f"empty report dictionary values")
         wildlife = WildLife.query.filter_by(id = info["wildlifeid"]).first()
         if not wildlife:
-            abort(Response('wildlife does not exist'))
+            abort(404, error_message=f"wildlife entry does not exist")
         new_report = Reports(text=info["text"], 
                              code=info["code"], 
                              wildlifeid=info["wildlifeid"],
                              resolved=False)
         db.session.add(new_report)
         db.session.commit()
-        return 200
+        return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+            )
 
 
 
 class AuthReport(Resource):
     @login_required
+    @has_role('curator')
     def put(self, reportid):
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if userole.role != 'curator':
-            abort(Response('not a curator'))
         reportid = int(reportid)
         cascade  = bool(request.args.get('cascade')) if request.args.get('cascade') is not None else False
         report = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).first()
         if not report:
-            abort(Response('report does not exist'))
+            abort(404, error_message=f"report entry does not exist")
         try:
             success = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).update({'resolved': True, 'userid': current_user.id})
             db.session.commit()
-            return 200
         except:
-            abort(Response('report does not exist'))
+            abort(404, error_message=f"report entry does not exist")
         if cascade:
             try:
-                reports = Reports.query.filter_by(wildlifeid = report.wildlifeid).update({'resolved': True, 'userid': current_user.id})
+                reports = Reports.query.filter(Reports.wildlifeid == report.wildlifeid)\
+                                       .filter(Reports.resolved != True)\
+                                       .update({'resolved': True, 'userid': current_user.id})
                 db.session.commit()
-                return 200
             except:
-                abort(Response('further reports do not exist'))
+                pass
+        return Response(
+                response = json.dumps({
+                    "message": "success"
+                    }),
+                status=200,
+                mimetype="application/json"
+        )
     @login_required
+    @has_role('curator')
     def delete(self, reportid):
-        userole = Roles.query.filter_by(id=current_user.id).first() 
-        if userole.role != 'curator':
-            abort(Response('not a curator'))
         cascade    = bool(request.args.get('cascade')) if request.args.get('cascade') is not None else False
         report = Reports.query.filter_by(id = reportid).first()
-        wildlifeid = report.wildlifeid
         try:
+            wildlifeid = report.wildlifeid
             db.session.delete(report)
             db.session.commit()
-            return 200
         except:
-            abort(Response('report does not exist'))
+            abort(404, error_message=f"report entry does not exist")
         if cascade:
             try:
-                wildlife = WildLife.query.filter_by(id=wildlifeid)
-                db.session.delete(wildlife)
-                db.session.commit()
-                reports = Reports.query.filter_by(wildlifeid = wildlifeid)
-                for report in reports.all():
-                    db.session.delete(report)
+                try:
+                    wildlife = WildLife.query.filter_by(id=wildlifeid)
+                    db.session.delete(wildlife)
                     db.session.commit()
-                return 200
+                except:
+                    pass
+                reports = Reports.query.filter(Reports.wildlifeid == wildlifeid).delete()
+                db.session.commit()
             except:
-                abort(Response('report does not exist'))
+                pass
+        return Response(
+                    response = json.dumps({
+                        "message": "success"
+                        }),
+                    status=200,
+                    mimetype="application/json"
+                )
