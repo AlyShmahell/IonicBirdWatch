@@ -3,14 +3,11 @@
     <ion-title>
       Map
     </ion-title>
+    <ion-button [routerLink]="['/camera']">Go to Camera</ion-button>
   </ion-toolbar>
 </ion-header>
-
-<ion-content class="ion-padding">
-  <ion-button [routerLink]="['/camera']">Go to Camera</ion-button>
-</ion-content>
 <ion-content padding>
-  <div id="map" class="map"></div>
+  <div id="map" class="map" id="map"></div>
 </ion-content>
 <div id="popup" class="ol-popup">
   <a href="#" id="popup-closer" class="ol-popup-closer"></a>

@@ -36,6 +36,9 @@
                 "input": "src/theme/variables.scss"
               },
               {
+                "input": "node_modules/ol/ol.css"
+              },
+              {
                 "input": "src/global.scss"
               }
             ],
@@ -98,7 +101,11 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "tsconfig.spec.json",
             "karmaConfig": "karma.conf.js",
-            "styles": [],
+            "styles": [
+              {
+                "input": "node_modules/ol/ol.css"
+              }
+            ],
             "scripts": [],
             "assets": [
               {

@@ -1,71 +1,91 @@
 import { AfterContentInit, Component, OnInit, ViewChild } from '@angular/core';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
+import 'ol/ol.css';
+import { Map, View, Overlay, Feature } from 'ol';
+import TileLayer from 'ol/layer/Tile';
+import { Vector as LayerVector } from 'ol/layer';
+import { Vector as SourceVector } from 'ol/source';
+import OSM from 'ol/source/OSM';
+import { fromLonLat, toLonLat } from 'ol/proj';
+import { Style, Icon } from 'ol/style';
+import { toStringHDMS } from 'ol/coordinate';
+import Point from 'ol/geom/Point';
+import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
 
-declare var ol: any;
 
 @Component({
   selector: 'app-map',
   templateUrl: 'map.page.html',
   styleUrls: ['map.page.scss'],
 })
+
+
 export class MapPage implements OnInit {
-  constructor(private geolocation: Geolocation) { }
-
-  map: any;
-
+  constructor(private geolocation: Geolocation) {}
   ngOnInit() {
+    var view = new View({
+      center: fromLonLat([0, 0]),
+      zoom: 8
+    });
+    var geometry = new Point(fromLonLat([0, 0]));
+    var container = document.getElementById('popup');
+    var closer   = document.getElementById('popup-closer');
+    var content  = document.getElementById('popup-content');
+    var overlay = new Overlay({
+      element: container,
+      autoPan: true,
+      autoPanAnimation: {
+        duration: 250000
+      }
+    });
+    var map = new Map({
+      interactions: defaultInteractions().extend([
+        new DragRotateAndZoom()
+      ]),
+      target: document.getElementById('map'),
+      overlays: [overlay],
+      layers: [
+        new TileLayer({
+          source: new OSM()
+        })
+      ],
+      view: view
+    });
+    var iconFeature = new Feature({
+      geometry: geometry
+    });
+    var ivaryle = new Style({
+      image: new Icon({
+        src: 'assets/img/map_marker.png'
+      })
+    });
+    iconFeature.setStyle(ivaryle);
+    var layer = new LayerVector({
+      source: new SourceVector({
+        features: [iconFeature]
+      })
+    });
+    map.addLayer(layer);
+    map.on('click', function (evt: any) {
+      var coordinate = evt.coordinate;
+      var hdms = toStringHDMS(toLonLat(coordinate));
+      content.innerHTML = '<p>clicked coordinates are :</p><code>' + hdms + '</code>';
+      overlay.setPosition(coordinate);
+      console.log(coordinate);
+      return true;
+    });
+    closer.onclick = function () {
+      overlay.setPosition(undefined);
+      closer.blur();
+      return false;
+    };
     let watch = this.geolocation.watchPosition();
     watch.subscribe((data) => {
-      const container = document.getElementById('popup');
-      const content   = document.getElementById('popup-content');
-      const closer    = document.getElementById('popup-closer');
-      var overlay   = new ol.Overlay({
-        element: container,
-        autoPan: true,
-        autoPanAnimation: {
-          duration: 250000
-        }
-      });
-      this.map = new ol.Map({
-        target: 'map',
-        overlays: [overlay],
-        layers: [
-          new ol.layer.Tile({
-            source: new ol.source.OSM()
-          })
-        ],
-        view: new ol.View({
-          center: ol.proj.fromLonLat([data.coords.longitude, data.coords.latitude]),
-          zoom: 8
-        })
-      });
-      var iconFeature = new ol.Feature({
-        geometry: new ol.geom.Point(ol.proj.fromLonLat([data.coords.longitude, data.coords.latitude]))
-      });
-      var iconStyle = new ol.style.Style({
-        image: new ol.style.Icon({
-          src: 'assets/img/map_marker.png'
-        })
-      });
-      iconFeature.setStyle(iconStyle);
-      var layer = new ol.layer.Vector({
-        source: new ol.source.Vector({
-          features: [iconFeature]
-        })
-      });
-      this.map.addLayer(layer);
-      this.map.on('click', function (evt: any) {
-        var coordinate = evt.coordinate;
-        var hdms = ol.coordinate.toStringHDMS(ol.proj.toLonLat(coordinate));
-        content.innerHTML = '<p>Current coordinates are :</p><code>' + hdms + '</code>';
-        overlay.setPosition(coordinate);
-        console.log(coordinate);
-        return true;
-      });
-      closer.onclick = function () {
-        closer.blur();
-        return false;
-      };
+      view.setCenter(fromLonLat([data.coords.longitude, data.coords.latitude]))
+      geometry.setCoordinates(fromLonLat([data.coords.longitude, data.coords.latitude]))
     });
+    setTimeout(() => {
+      map.updateSize();
+    }, 500);
   }
 }
