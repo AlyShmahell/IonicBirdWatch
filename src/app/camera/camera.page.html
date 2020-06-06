@@ -1,13 +1,11 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>camera</ion-title>
+    <ion-button (click)="captureImage()">
+      Take Picture
+    </ion-button>
   </ion-toolbar>
 </ion-header>
-<ion-content>
-  <ion-button (click)="captureImage()">
-    Take Picture
-  </ion-button>
-</ion-content>
 <ion-content class="ion-padding">
   <img [src]="clickedImage" />
 </ion-content>
