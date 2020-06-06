@@ -31,5 +31,8 @@ npm-debug.log*
 /www
 **/dist
 **/node_modules
+**/node_modules/*
+**/__pycache__
+**/__pycache__/*
 **/platforms
 **/www

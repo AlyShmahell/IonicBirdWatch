@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { File } from '@ionic-native/file/ngx';
 import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 
 @Component({
@@ -8,7 +9,7 @@ import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 })
 export class CameraPage {
 
-  clickedImage: string;
+  clickedImage: string = 'assets/img/map_marker.png';
 
   options: CameraOptions = {
     quality: 30,
@@ -17,17 +18,16 @@ export class CameraPage {
     mediaType: this.camera.MediaType.PICTURE
   }
 
-  constructor(private camera: Camera) { }
-
+  constructor(private camera: Camera) {  }
+  resetImage(){
+    this.clickedImage = 'assets/img/map_marker.png';
+  }
   captureImage() {
     this.camera.getPicture(this.options).then((imageData) => {
-      // imageData is either a base64 encoded string or a file URI
-      // If it's base64 (DATA_URL):
       let base64Image = 'data:image/jpeg;base64,' + imageData;
       this.clickedImage = base64Image;
     }, (err) => {
       console.log(err);
-      // Handle error
     });
   }
 

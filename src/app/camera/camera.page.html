@@ -3,11 +3,14 @@
     <ion-title>camera</ion-title>
   </ion-toolbar>
 </ion-header>
-
 <ion-content>
   <ion-button (click)="captureImage()">
-    Click Picture
+    Take Picture
   </ion-button>
-
+</ion-content>
+<ion-content class="ion-padding">
   <img [src]="clickedImage" />
+</ion-content>
+<ion-content class="ion-padding">
+  <ion-button [routerLink]="['/map']" (click)="resetImage()">Go to Map</ion-button>
 </ion-content>
