@@ -1,13 +1,32 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title class='ion-text-center'>
+    <ion-title class="ion-text-center">
       Map
     </ion-title>
-    <ion-button  class='ion-text-center' [routerLink]="['/camera']">Go to Camera</ion-button>
+    <ion-button class="ion-text-center" [routerLink]="['/camera']"
+      >Go to Camera</ion-button
+    >
   </ion-toolbar>
 </ion-header>
 <ion-content padding>
   <div id="map" class="map" id="map"></div>
+
+  <app-slide-drawer title="">
+    <ion-list>
+      <ion-item *ngFor="let item of items">{{item}}</ion-item>
+    </ion-list>
+  </app-slide-drawer>
+  <ion-infinite-scroll
+    threshold="100px"
+    (ionInfinite)="loadData($event)"
+    [disabled]="numTimesLeft <= 0"
+  >
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more data..."
+    >
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
 </ion-content>
 <div id="popup" class="ol-popup">
   <a href="#" id="popup-closer" class="ol-popup-closer"></a>

@@ -21,13 +21,40 @@ import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interacti
 
 
 export class MapPage implements OnInit {
-  constructor(private geolocation: Geolocation) {}
+
+  items = [];
+  numTimesLeft = 5;
+
+  constructor(private geolocation: Geolocation) {
+    this.addMoreItems();
+  }
+
+  loadData(event) {
+    setTimeout(() => {
+      this.addMoreItems();
+      this.numTimesLeft -= 1;
+      event.target.complete();
+    }, 2000);
+  }
+
+  addMoreItems() {
+    for (let i=0; i<10; i++)
+      this.items.push(i);
+  }
+
   ngOnInit() {
+    var center = [0, 0];
+    this.geolocation.getCurrentPosition().then((resp) => {
+      center = [resp.coords.longitude, resp.coords.latitude]
+      console.log("set coordinate", center);
+     }).catch((error) => {
+       console.log('Error getting location', error);
+     });
     var view = new View({
-      center: fromLonLat([0, 0]),
+      center: fromLonLat(center),
       zoom: 8
     });
-    var geometry = new Point(fromLonLat([0, 0]));
+    var geometry = new Point(fromLonLat(center));
     var container = document.getElementById('popup');
     var closer   = document.getElementById('popup-closer');
     var content  = document.getElementById('popup-content');
@@ -81,11 +108,13 @@ export class MapPage implements OnInit {
     };
     let watch = this.geolocation.watchPosition();
     watch.subscribe((data) => {
-      view.setCenter(fromLonLat([data.coords.longitude, data.coords.latitude]))
-      geometry.setCoordinates(fromLonLat([data.coords.longitude, data.coords.latitude]))
+      center = [data.coords.longitude, data.coords.latitude]
+      console.log("changed coordinate", center);
+      view.setCenter(fromLonLat(center))
+      geometry.setCoordinates(fromLonLat(center))
     });
     setTimeout(() => {
       map.updateSize();
-    }, 500);
+    }, 1);
   }
 }
