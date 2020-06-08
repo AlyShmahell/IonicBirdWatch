@@ -1,11 +1,16 @@
 import { Component, AfterViewInit, ElementRef, Renderer2, Input } from '@angular/core';
 import { GestureController } from '@ionic/angular';
 import { Gesture, GestureConfig } from '@ionic/core';
+import { Injectable } from '@angular/core';
 
 @Component({
   selector: 'app-slide-drawer',
   templateUrl: './slide-drawer.component.html',
   styleUrls: ['./slide-drawer.component.scss'],
+})
+ 
+@Injectable({
+  providedIn: 'root'
 })
 export class SlideDrawerComponent implements AfterViewInit {
   state: string = 'bottom';

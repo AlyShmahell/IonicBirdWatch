@@ -23,11 +23,13 @@ export class DatabaseService {
  
   constructor(private plt: Platform, private sqlitePorter: SQLitePorter, private sqlite: SQLite, private http: HttpClient) {
     this.plt.ready().then(() => {
+      console.log("db 0");
       this.sqlite.create({
         name: 'database.db',
         location: 'default'
       })
       .then((db: SQLiteObject) => {
+          console.log("db 1");
           this.database = db;
           this.seedDatabase();
       });

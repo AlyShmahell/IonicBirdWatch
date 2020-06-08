@@ -11,6 +11,8 @@ import { Style, Icon } from 'ol/style';
 import { toStringHDMS } from 'ol/coordinate';
 import Point from 'ol/geom/Point';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
+import { Injectable } from '@angular/core';
+import {DatabaseService, Item} from './database.service'
 
 
 @Component({
@@ -19,13 +21,27 @@ import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interacti
   styleUrls: ['fmap.component.scss'],
 })
 
+ 
+@Injectable({
+  providedIn: 'root'
+})
 
 export class fMapComponent implements OnInit {
-  
+  items: Item[] = [];
+  item = {};
   @Input() title: string = 'Drawer UI element';
-  constructor(private geolocation: Geolocation) {}
+  constructor(private geolocation: Geolocation, private db: DatabaseService) {}
 
   ngOnInit() {
+
+    this.db.getDatabaseState().subscribe(rdy => {
+      if (rdy) {
+        this.db.getItems().subscribe(items => {
+          this.items = items;
+        })
+      }
+    });
+
     var center = [0, 0];
     this.geolocation.getCurrentPosition().then((resp) => {
       center = [resp.coords.longitude, resp.coords.latitude]

@@ -36,6 +36,7 @@
     "cordova-plugin-file": "^6.0.2",
     "cordova-plugin-geolocation": "^4.0.2",
     "cordova-sqlite-storage": "^5.0.0",
+    "cordova-windows": "7.0.1",
     "core-js": "^2.5.4",
     "lodash": "^4.17.15",
     "ol": "^6.3.1",
@@ -89,7 +90,8 @@
       "cordova-sqlite-storage": {}
     },
     "platforms": [
-      "browser"
+      "browser",
+      "windows"
     ]
   }
 }
