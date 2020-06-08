@@ -21,6 +21,7 @@ interface Item {
 export class InfListComponent implements OnInit {
   @Input() url: string = '#';
   items = [];
+  items$: Observable<Item[]>;
   inflistdisabled = false;
   constructor(private http: HttpClient) { }
   ngOnInit() {
@@ -30,13 +31,13 @@ export class InfListComponent implements OnInit {
     console.log("inflist called");
     this.http
       .get<Item[]>("https://jsonplaceholder.typicode.com/todos/1")
-      .pipe(
-        map(response => {
-          console.log("items");
-          console.log(response);
-          this.items = _.values(response);
-          console.log(this.items);
-        }));
+      .subscribe(data => {
+        console.log(data);
+        this.items = _.values(data);
+      }, 
+      err => {
+        console.log(err);
+      });
   }
   inflistload(event) {
     this.requestdata();
