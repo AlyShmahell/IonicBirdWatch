@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs-compat";
 import { map } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
 interface Item {
@@ -11,13 +12,17 @@ interface Item {
   completed: boolean;
 }
 
+
+
 @Component({
   selector: 'inflist',
   templateUrl: 'inflist.component.html',
   styleUrls: ['inflist.component.scss'],
 })
 
-
+@Injectable({
+  providedIn: 'root'
+})
 export class InfListComponent implements OnInit {
   @Input() url: string = '#';
   items = [];

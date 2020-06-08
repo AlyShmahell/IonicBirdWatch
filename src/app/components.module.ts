@@ -2,9 +2,9 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import {HttpClientModule} from '@angular/common/http';
-import { SlideDrawerComponent } from './slide-drawer/slide-drawer.component';
-import { fMapComponent } from './fmap/fmap.component';
-import { InfListComponent } from './inflist/inflist.component';
+import { SlideDrawerComponent } from './slide-drawer.component';
+import { fMapComponent } from './fmap.component';
+import { InfListComponent } from './inflist.component';
 
 
 

@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MapPage } from './map.page';
-import { ComponentsModule } from '../component/components.module';
+import { ComponentsModule } from './components.module';
 
 @NgModule({
   imports: [
