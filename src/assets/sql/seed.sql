@@ -1,0 +1,8 @@
+CREATE TABLE items (
+	id INTEGER NOT NULL, 
+	userId INTEGER NOT NULL, 
+	title VARCHAR(300) NOT NULL, 
+	completed BOOLEAN NOT NULL, 
+	PRIMARY KEY (id), 
+	UNIQUE (userid)
+)
