@@ -30,6 +30,7 @@
     "@ionic-native/sqlite-porter": "^5.26.0",
     "@ionic-native/status-bar": "^5.0.0",
     "@ionic/angular": "^5.0.0",
+    "@ionic/storage": "^2.2.0",
     "cordova-browser": "6.0.0",
     "cordova-plugin-advanced-http": "^2.5.1",
     "cordova-plugin-camera": "^4.1.0",
@@ -42,6 +43,7 @@
     "ol": "^6.3.1",
     "rxjs-compat": "^6.5.5",
     "tslib": "^1.9.0",
+    "uk.co.workingedge.cordova.plugin.sqliteporter": "^1.1.1",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
@@ -87,7 +89,8 @@
       "cordova-plugin-file": {},
       "cordova-plugin-geolocation": {},
       "cordova-plugin-advanced-http": {},
-      "cordova-sqlite-storage": {}
+      "cordova-sqlite-storage": {},
+      "uk.co.workingedge.cordova.plugin.sqliteporter": {}
     },
     "platforms": [
       "browser",

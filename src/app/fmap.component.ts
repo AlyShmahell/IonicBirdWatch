@@ -12,7 +12,7 @@ import { toStringHDMS } from 'ol/coordinate';
 import Point from 'ol/geom/Point';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
 import { Injectable } from '@angular/core';
-import {DatabaseService, Item} from './database.service'
+import { SQLiteProvider } from './sqlite.provider';
 
 
 @Component({
@@ -21,42 +21,41 @@ import {DatabaseService, Item} from './database.service'
   styleUrls: ['fmap.component.scss'],
 })
 
- 
+
 @Injectable({
   providedIn: 'root'
 })
 
 export class fMapComponent implements OnInit {
-  items: Item[] = [];
-  item = {};
   @Input() title: string = 'Drawer UI element';
-  constructor(private geolocation: Geolocation, private db: DatabaseService) {}
-
+  constructor(private geolocation: Geolocation, private db: SQLiteProvider) { }
+  async testdb() {
+    console.log("testing SQL 1");
+    let res = await this.db.seed('assets/sql/seed.sql');
+    console.log("testing SQL 2: ", res);
+    await this.db.dbInstance.executeSql(`INSERT INTO user(id, name) VALUES (1, 'Suraj')`);
+    console.log("testing SQL 3");
+    let users = await this.db.dbInstance.executeSql('SELECT * FROM user');
+    console.log("testing SQL 4");
+    console.log(users);
+  }
   ngOnInit() {
-
-    this.db.getDatabaseState().subscribe(rdy => {
-      if (rdy) {
-        this.db.getItems().subscribe(items => {
-          this.items = items;
-        })
-      }
-    });
 
     var center = [0, 0];
     this.geolocation.getCurrentPosition().then((resp) => {
       center = [resp.coords.longitude, resp.coords.latitude]
       console.log("set coordinate", center);
-     }).catch((error) => {
-       console.log('Error getting location', error);
-     });
+    }).catch((error) => {
+      console.log('Error getting location', error);
+    });
     var view = new View({
       center: fromLonLat(center),
       zoom: 8
     });
     var geometry = new Point(fromLonLat(center));
     var container = document.getElementById('ol-popup');
-    var closer   = document.getElementById('ol-popup-closer');
-    var content  = document.getElementById('ol-popup-content');
+    var closer = document.getElementById('ol-popup-closer');
+    var content = document.getElementById('ol-popup-content');
     var overlay = new Overlay({
       element: container,
       autoPan: true,
@@ -115,6 +114,7 @@ export class fMapComponent implements OnInit {
     });
     setTimeout(() => {
       map.updateSize();
+      this.testdb();
     }, 1);
   }
 }

@@ -12,8 +12,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { Camera } from '@ionic-native/camera/ngx';
 import { File } from '@ionic-native/file/ngx';
 import { Geolocation } from '@ionic-native/geolocation/ngx';
-
-import { SQLitePorter } from '@ionic-native/sqlite-porter/ngx';
+import { IonicStorageModule } from '@ionic/storage';
 import { SQLite } from '@ionic-native/sqlite/ngx';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClient } from "@angular/common/http";
@@ -21,7 +20,7 @@ import { HttpClient } from "@angular/common/http";
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, HttpClientModule],
+  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, IonicStorageModule.forRoot(), HttpClientModule],
   providers: [
     Geolocation,
     File,
@@ -30,7 +29,6 @@ import { HttpClient } from "@angular/common/http";
     SplashScreen,
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     SQLite,
-    SQLitePorter,
     HttpClient
   ],
   bootstrap: [AppComponent]
