@@ -5,10 +5,15 @@ from flask_restful import Resource, request, abort
 from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.datastructures import Headers
 from models import Users, Roles, WildLife, Reports, db, login_manager, authorize
 from sqlalchemy import or_
 from search import *
 import functools
+
+
+headers = Headers()
+headers.add('Access-Control-Allow-Origin', '*')
 
 
 def has_role(role=None):
@@ -56,7 +61,8 @@ class Auth(Resource):
                     "message": "success"
                     }),
                 status=201,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
         except:
             try:
@@ -331,7 +337,8 @@ class GuestWildLifeMany(Resource):
                     "data": wf
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers=headers
             )
 
 
