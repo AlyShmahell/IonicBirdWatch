@@ -82,7 +82,7 @@ export class fMapComponent implements OnInit {
     });
     var ivaryle = new Style({
       image: new Icon({
-        src: 'assets/img/map_marker.png'
+        src: 'assets/img/location-outline.png'
       })
     });
     iconFeature.setStyle(ivaryle);

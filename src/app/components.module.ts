@@ -6,19 +6,24 @@ import { HttpClient } from "@angular/common/http";
 import { SlideDrawerComponent } from './slide-drawer.component';
 import { fMapComponent } from './fmap.component';
 import { InfListComponent } from './inflist.component';
+import { Safe } from './safe.component';
+import {AppToolBar} from './atoolbar.component';
+import {AppMenu} from './amenu.component';
+import { RouterModule } from '@angular/router';
 
 
 
 @NgModule({
-  declarations: [SlideDrawerComponent, fMapComponent, InfListComponent],
+  declarations: [SlideDrawerComponent, fMapComponent, InfListComponent, Safe, AppToolBar, AppMenu],
   imports: [
     CommonModule,
     HttpClientModule,
-    IonicModule
+    IonicModule,
+    RouterModule
   ],
   providers: [
     HttpClient
   ],
-  exports: [SlideDrawerComponent, fMapComponent, InfListComponent]
+  exports: [SlideDrawerComponent, fMapComponent, InfListComponent, Safe, AppToolBar, AppMenu]
 })
 export class ComponentsModule { }

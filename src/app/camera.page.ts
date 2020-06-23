@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { File } from '@ionic-native/file/ngx';
-import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
+import { Plugins, CameraResultType, CameraSource } from '@capacitor/core';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-camera',
@@ -9,26 +9,25 @@ import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 })
 export class CameraPage {
 
-  clickedImage: string = 'assets/img/map_marker.png';
+  photo: SafeResourceUrl;
 
-  options: CameraOptions = {
-    quality: 30,
-    destinationType: this.camera.DestinationType.DATA_URL,
-    encodingType: this.camera.EncodingType.JPEG,
-    mediaType: this.camera.MediaType.PICTURE
-  }
+  constructor(private sanitizer: DomSanitizer) { 
+    this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/image-outline.png');
+   }
 
-  constructor(private camera: Camera) {  }
-  resetImage(){
-    this.clickedImage = 'assets/img/map_marker.png';
-  }
-  captureImage() {
-    this.camera.getPicture(this.options).then((imageData) => {
-      let base64Image = 'data:image/jpeg;base64,' + imageData;
-      this.clickedImage = base64Image;
-    }, (err) => {
-      console.log(err);
+  async capture() {
+    const image = await Plugins.Camera.getPhoto({
+      quality: 100,
+      allowEditing: false,
+      resultType: CameraResultType.DataUrl,
+      source: CameraSource.Camera
     });
-  }
 
+    this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(image && (image.dataUrl));
+  }
+  reset(event)
+  {
+    console.log(event);
+    this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/image-outline.png');
+  }
 }

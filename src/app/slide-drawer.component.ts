@@ -1,6 +1,5 @@
-import { Component, AfterViewInit, ElementRef, Renderer2, Input } from '@angular/core';
-import { GestureController } from '@ionic/angular';
-import { Gesture, GestureConfig } from '@ionic/core';
+import { Component, AfterViewInit, OnInit, Input} from '@angular/core';
+import { CupertinoPane, CupertinoSettings } from 'cupertino-pane';
 import { Injectable } from '@angular/core';
 
 @Component({
@@ -12,62 +11,29 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
-export class SlideDrawerComponent implements AfterViewInit {
-  state: string = 'bottom';
-  @Input() title: string = 'Drawer UI element';
-  @Input() handleHeight: number = 138;
+export class SlideDrawerComponent implements OnInit {
+  drawer: CupertinoPane;
+  @Input() selector: string = '';
+  constructor() {}
 
-  constructor(
-    private gestureCtrl: GestureController,
-    private element: ElementRef,
-    private renderer: Renderer2) {}
-
-  ngOnInit() {}
-
-  async ngAfterViewInit() {
-    const windowHeight = window.innerHeight;
-    const drawerHeight = windowHeight - this.handleHeight; 
-    // const drawerHeight = windowHeight - 118; 
-    this.renderer.setStyle(this.element.nativeElement, 'top', windowHeight - this.handleHeight + 'px')  
-
-    const options: GestureConfig = {
-      el: document.querySelector('#header'),
-      direction: 'y',
-      gestureName: 'slide-drawer-swipe',
-      onStart: (ev) => {
-        // do something as the gesture begins
-        this.renderer.setStyle(this.element.nativeElement, 'transition', 'none');
-      },
-      onMove: (ev) => {
-        // do something in response to movement        
-        if (ev.deltaY < 0 && this.state === 'bottom') {
-          this.renderer.setStyle(this.element.nativeElement, 'transform', `translateY(${ev.deltaY}px)`);
-
-        } else if (this.state === 'top') {
-          // element size is -76 then deltaY subtraction. ex. calc (2 - 76) = -74 means downward movement.
-          this.renderer.setStyle(this.element.nativeElement, 'transform', `translateY(calc(${ev.deltaY}px - ${drawerHeight}px))`);
-        }
-      },
-      onEnd: (ev) => {
-        // do something when the gesture ends
-        this.renderer.setStyle(this.element.nativeElement, 'transition', '0.3s ease-out');
-        if (ev.deltaY < -(windowHeight / 20) && this.state === 'bottom') {
-          this.renderer.setStyle(this.element.nativeElement, 'transform', `translateY(-${drawerHeight}px)`);
-          this.state = 'top';
-        } else if (ev.deltaY < (windowHeight / 20) && this.state === 'top') {
-          this.renderer.setStyle(this.element.nativeElement, 'transform', `translateY(-${drawerHeight}px)`);
-          this.state = 'top';
-        } else if (ev.deltaY > (windowHeight / 20) && this.state === 'top') {
-          this.renderer.setStyle(this.element.nativeElement, 'transform', 'translateY(0px)');
-          this.state = 'bottom';
-        } else {
-          this.renderer.setStyle(this.element.nativeElement, 'transform', 'translateY(0px)');
-          this.state = 'bottom';
+  ngOnInit() {
+    this.drawer = new CupertinoPane(this.selector, {
+      buttonClose:false,
+      breaks: {
+        top: {
+          enabled: true,
+          height: window.screen.height - (135 * 0.35)
+        },
+        middle: { 
+          enabled: true,
+          height: window.screen.height / 2
+        },
+        bottom: { 
+          enabled: true,
+          height: window.screen.height / 5
         }
       }
-    };
-    const gesture: Gesture = await this.gestureCtrl.create(options);
-    gesture.enable();
+    });
+    this.drawer.present();
   }
-
 }

@@ -1,14 +1,16 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>camera</ion-title>
-    <ion-button (click)="captureImage()">
-      Take Picture
-    </ion-button>
-  </ion-toolbar>
-</ion-header>
-<ion-content class="ion-padding">
-  <img [src]="clickedImage" />
-</ion-content>
-<ion-content class="ion-padding">
-  <ion-button [routerLink]="['/map']" (click)="resetImage()">Go to Map</ion-button>
-</ion-content>
+<app-toolbar (deteriorated)="reset($event)"></app-toolbar>
+
+<ion-grid style="height: 100%;">
+  <ion-row class="ion-align-items-center" style="height: 100%;">
+    <ion-col size="3" class="ion-text-center">
+      <ion-button (click)="capture()">
+        <ion-icon name="camera-outline"></ion-icon>
+      </ion-button>
+    </ion-col>
+    <ion-col size="1" class="ion-text-center">
+    </ion-col>
+    <ion-col size="8" class="ion-text-center">
+      <img [src]="photo" />
+    </ion-col>
+  </ion-row>
+</ion-grid>

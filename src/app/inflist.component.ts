@@ -1,15 +1,19 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs-compat";
-import { map } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
 interface Item {
-  userId: BigInteger;
   id: BigInteger;
-  title: string;
-  completed: boolean;
+  userid: BigInteger;
+  species: string;
+  lat: BigInteger;
+  date: Date;
+  notes: string;
+  type: BigInteger;
+  lon: BigInteger;
+  photo: string;
 }
 
 
@@ -35,10 +39,11 @@ export class InfListComponent implements OnInit {
   requestdata() {
     console.log("inflist called");
     this.http
-      .get<Item[]>("https://jsonplaceholder.typicode.com/todos/1")
+      .get<Item[]>('http://127.0.0.1:5000/guest/wildlife?text="awesome"&filters={"maxd": "2018-06-29 08:15:27.243860", "mind": "2018-06-29 08:15:27.243860", "type": ["bird"], "by": "me"}&location={"lon": 50, "lat": 50}&area=15')
       .subscribe(data => {
         console.log(data);
-        this.items = _.values(data);
+        this.items = _.values(data['data']);
+        console.log(this.items);
       }, 
       err => {
         console.log(err);

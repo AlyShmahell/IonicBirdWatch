@@ -1,16 +1,7 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title class="ion-text-center">
-      Map
-    </ion-title>
-    <ion-button class="ion-text-center" [routerLink]="['/camera']"
-      >Camera</ion-button
-    >
-  </ion-toolbar>
-</ion-header>
-<ion-content padding>
+<app-toolbar (deteriorated)="reset($event)"></app-toolbar>
+<ion-content>
   <fmap></fmap>
-  <app-slide-drawer title="">
-    <inflist url="">A</inflist>
+  <app-slide-drawer selector="inflist">
   </app-slide-drawer>
+  <inflist url=""></inflist>
 </ion-content>

@@ -10,4 +10,7 @@ import { Component, OnInit } from '@angular/core';
 export class MapPage implements OnInit {
 
    ngOnInit() {}
+   reset(event){
+     console.log(event);
+   }
 }
