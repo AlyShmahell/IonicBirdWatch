@@ -20,8 +20,20 @@
     />
     <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.3.1/build/ol.js"></script>
     <!-- ol-ext -->
-<link rel="stylesheet" href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css" />
-<script type="text/javascript" src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.css"
+    />
+    <script
+      type="text/javascript"
+      src="https://cdn.rawgit.com/Viglino/ol-ext/master/dist/ol-ext.min.js"
+    ></script>
+    <!-- jQuery Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"
+    />
     <style>
       * {
         font-family: Arial, Helvetica, sans-serif;
@@ -150,9 +162,9 @@
         margin-bottom: 1vh;
         grid-area: header;
         border: 0;
-        color: #EEEEEE;
+        color: #eeeeee;
         border-radius: 4px;
-        background-color: #990000 ;
+        background-color: #990000;
         display: flex;
       }
 
@@ -205,7 +217,7 @@
         border-style: solid;
         border-radius: 4px;
         border-width: 4px;
-        border-color: #AAD3DF;
+        border-color: #aad3df;
         transition: 0.3s;
         width: 88%;
         margin: 0 5% 10% 5%;
@@ -214,7 +226,7 @@
       .wildlife {
         border-style: solid;
         border-width: 4px;
-        border-color: #AAD3DF;
+        border-color: #aad3df;
         display: grid;
         grid-template-columns: auto;
         grid-template-rows: 2fr auto auto;
@@ -226,7 +238,7 @@
       }
       .wildlife-photo {
         grid-area: wildlife-photo;
-        border-bottom: 4px solid #AAD3DF;
+        border-bottom: 4px solid #aad3df;
         padding: 1%;
       }
       .wildlife-distance {
@@ -247,7 +259,7 @@
         padding: 1%;
       }
       .wildlife-notes {
-        border-top: 4px solid #AAD3DF;
+        border-top: 4px solid #aad3df;
         grid-area: wildlife-notes;
         padding: 1%;
         color: #1b1b1b;
@@ -259,7 +271,7 @@
         border-style: solid;
         border-width: 4px;
         border-color: #990000;
-        background-color: #FFEEEE;
+        background-color: #ffeeee;
         display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: 1fr;
@@ -284,16 +296,16 @@
           "report-text report-text";
         padding: 1%;
       }
-      .report-title{
-          grid-area: report-title;
+      .report-title {
+        grid-area: report-title;
       }
-      .report-code{
-          grid-area: report-code;
-          text-align: right;
+      .report-code {
+        grid-area: report-code;
+        text-align: right;
       }
-      .report-text{
+      .report-text {
         border-top: 4px solid #990000;
-          grid-area: report-text;
+        grid-area: report-text;
       }
 
       .card-content {
@@ -341,6 +353,10 @@
       ::-webkit-scrollbar-thumb:hover {
         background: #aad3df;
       }
+
+      .whitefront {
+        color: white;
+      }
     </style>
   </head>
   <body>
@@ -358,10 +374,15 @@
 
     <div class="nav center">
       <div class="flex">
+        <div id="filters" class="modal">
+          <p>Thanks for clicking. That felt good.</p>
+        </div>
         <div class="command spacy">
           <i class="fas fa-link"></i>
           <i class="fas fa-download"></i>
-          <i class="fas fa-filter"></i>
+          <a href="#filters" rel="modal:open"
+            ><i class="fas fa-filter whitefront"></i
+          ></a>
         </div>
         <div class="list">
           <div class="card">
@@ -385,22 +406,22 @@
               </div>
             </div>
             <div class="report">
-                <div class="report-body">
-                    <div class="report-title">
-                        Animal Abuse
-                    </div>
-                    <div class="report-code">
-                        100
-                    </div>
-                    <div class="report-text">
-                        save this animal
-                    </div>
+              <div class="report-body">
+                <div class="report-title">
+                  Animal Abuse
                 </div>
-                <div class="report-options spacy">
-                    <i class="far fa-check-square"></i>
-                    <i class="fas fa-trash"></i>
-                    <i class="fas fa-minus-circle"></i>
+                <div class="report-code">
+                  100
                 </div>
+                <div class="report-text">
+                  save this animal
+                </div>
+              </div>
+              <div class="report-options spacy">
+                <i class="far fa-check-square"></i>
+                <i class="fas fa-trash"></i>
+                <i class="fas fa-minus-circle"></i>
+              </div>
             </div>
           </div>
           <div class="card">
@@ -423,22 +444,22 @@
               </div>
             </div>
             <div class="report">
-                <div class="report-body">
-                    <div class="report-title">
-                        Animal Abuse
-                    </div>
-                    <div class="report-code">
-                        100
-                    </div>
-                    <div class="report-text">
-                        save this animal
-                    </div>
+              <div class="report-body">
+                <div class="report-title">
+                  Animal Abuse
                 </div>
-                <div class="report-options spacy">
-                    <i class="far fa-check-square"></i>
-                    <i class="fas fa-trash"></i>
-                    <i class="fas fa-minus-circle"></i>
+                <div class="report-code">
+                  100
                 </div>
+                <div class="report-text">
+                  save this animal
+                </div>
+              </div>
+              <div class="report-options spacy">
+                <i class="far fa-check-square"></i>
+                <i class="fas fa-trash"></i>
+                <i class="fas fa-minus-circle"></i>
+              </div>
             </div>
           </div>
           <div class="card">
@@ -461,22 +482,22 @@
               </div>
             </div>
             <div class="report">
-                <div class="report-body">
-                    <div class="report-title">
-                        Animal Abuse
-                    </div>
-                    <div class="report-code">
-                        100
-                    </div>
-                    <div class="report-text">
-                        save this animal
-                    </div>
+              <div class="report-body">
+                <div class="report-title">
+                  Animal Abuse
                 </div>
-                <div class="report-options spacy">
-                    <i class="far fa-check-square"></i>
-                    <i class="fas fa-trash"></i>
-                    <i class="fas fa-minus-circle"></i>
+                <div class="report-code">
+                  100
                 </div>
+                <div class="report-text">
+                  save this animal
+                </div>
+              </div>
+              <div class="report-options spacy">
+                <i class="far fa-check-square"></i>
+                <i class="fas fa-trash"></i>
+                <i class="fas fa-minus-circle"></i>
+              </div>
             </div>
           </div>
         </div>
@@ -522,12 +543,14 @@
             zoom: 4,
           }),
         });
-        var search = new ol.control.Search(
-		{	//target: $(".options").get(0),
-			// Title to use in the list
-			getTitle: function(f) { return f.name; }
-		});
-	map.addControl (search);
+        var search = new ol.control.Search({
+          //target: $(".options").get(0),
+          // Title to use in the list
+          getTitle: function (f) {
+            return f.name;
+          },
+        });
+        map.addControl(search);
         $(".ol-attribution").hide();
         map.on("singleclick", function (evt) {
           var coordinate = evt.coordinate;
@@ -591,6 +614,17 @@
             easing: "easeOutExpo",
             delay: 10000,
           });
+        var input = document.getElementsByClassName("search");
+
+        // Execute a function when the user releases a key on the keyboard
+        input[0].addEventListener("keyup", function (event) {
+          // Number 13 is the "Enter" key on the keyboard
+          if (event.keyCode === 13) {
+            // Cancel the default action, if needed
+            event.preventDefault();
+            console.log($(".search").val());
+          }
+        });
       });
     </script>
   </body>
