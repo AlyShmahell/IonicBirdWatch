@@ -6,6 +6,11 @@
       integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
       crossorigin="anonymous"
     ></script>
+    <link rel="stylesheet" href="nouislider.min.css" />
+    <script src="nouislider.min.js"></script>
+    <script src="wNumb.min.js"></script>
+    <link href="tag-picker.min.css" rel="stylesheet" />
+    <script src="tag-picker.min.js"></script>
     <link
       rel="stylesheet"
       href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
@@ -357,6 +362,19 @@
       .whitefront {
         color: white;
       }
+
+      .filters {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .filters * {
+        font-weight: 900;
+        font-family: "Courier New", Courier, monospace;
+      }
+      .daterange {
+        width: 30px;
+      }
     </style>
   </head>
   <body>
@@ -374,8 +392,26 @@
 
     <div class="nav center">
       <div class="flex">
-        <div id="filters" class="modal">
-          <p>Thanks for clicking. That felt good.</p>
+        <div class="modal">
+          <form id="filters" class="filters" action="#" method="GET">
+            <label>Interested In</label>
+            <br />
+            <input type="text" id="interestedin" name="interestedin" />
+            <br />
+            <br />
+            <br />
+            <label>Date Range</label>
+            <br />
+            <br />
+            <br />
+            <br />
+            <div>
+              <div id="daterange"></div>
+            </div>
+            <script>
+              let picker = new TP($("#interestedin")[0]);
+            </script>
+          </form>
         </div>
         <div class="command spacy">
           <i class="fas fa-link"></i>
@@ -614,16 +650,36 @@
             easing: "easeOutExpo",
             delay: 10000,
           });
-        var input = document.getElementsByClassName("search");
-
-        // Execute a function when the user releases a key on the keyboard
-        input[0].addEventListener("keyup", function (event) {
-          // Number 13 is the "Enter" key on the keyboard
-          if (event.keyCode === 13) {
-            // Cancel the default action, if needed
-            event.preventDefault();
-            console.log($(".search").val());
+        var daterange = $("#daterange")[0];
+        noUiSlider.create(daterange, {
+          start: [20, 80],
+          tooltips: [wNumb({ decimals: 1 }), true],
+          connect: true,
+          range: {
+            min: 0,
+            max: 100,
+          },
+        });
+        daterange.noUiSlider.on("update", function (values, handle) {
+          $("#daterange_n" + handle).remove();
+          var r = $(
+            '<input name="daterange_n' +
+              handle +
+              '" id="daterange_n'+handle+'" type="text" hidden/>'
+          );
+          $("#filters").append(r);
+          $("#daterange_n" + handle).val(values[handle]);
+        });
+        $(".search").attr("form", "filters");
+        $(".search").attr("name", "search");
+        $(".search").on("keypress", function (e) {
+          if (e.which == 13) {
+            $("#filters").submit();
           }
+        });
+        $("#filters").on("submit", function (event) {
+          event.preventDefault();
+          console.log($("#filters").serialize());
         });
       });
     </script>
