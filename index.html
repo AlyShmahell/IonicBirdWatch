@@ -375,6 +375,23 @@
       .daterange {
         width: 30px;
       }
+
+      .report-options,
+      .report-options * {
+        color: #990000;
+      }
+
+      .form {
+        display: inline-block;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .row {
+        display: flex;
+        flex-direction: row;
+      }
     </style>
   </head>
   <body>
@@ -416,9 +433,9 @@
         <div class="command spacy">
           <i class="fas fa-link"></i>
           <i class="fas fa-download"></i>
-          <a href="#filters" rel="modal:open"
-            ><i class="fas fa-filter whitefront"></i
-          ></a>
+          <a href="#filters" rel="modal:open">
+            <i class="fas fa-filter whitefront"></i>
+          </a>
         </div>
         <div class="list">
           <div class="card">
@@ -453,10 +470,65 @@
                   save this animal
                 </div>
               </div>
+              <div class="modal">
+                <div id="resolve-report" class="bullseye">
+                  <form class="form" action="#" method="PUT">
+                    <div class="row">
+                      <label for="true"> Resolve Related Reports </label>
+                      <input
+                        type="radio"
+                        id="true"
+                        name="cascade"
+                        value="true"
+                      />
+                    </div>
+                    <input
+                      type="radio"
+                      id="false"
+                      name="cascade"
+                      value="false"
+                      checked
+                      hidden
+                    />
+                    <br />
+                    <button type="submit">
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
+                  </form>
+                </div>
+                <div class="bullseye" id="remove-report">
+                  <form class="form" action="#" method="DELETE">
+                    <div class="row">
+                      <label for="true"> Delete Related Reports </label>
+                      <input
+                        type="radio"
+                        id="true"
+                        name="cascade"
+                        value="true"
+                      />
+                    </div>
+                    <input
+                      type="radio"
+                      id="false"
+                      name="cascade"
+                      value="false"
+                      checked
+                      hidden
+                    />
+                    <br />
+                    <button type="submit">
+                      <i class="fas fa-paper-plane"></i>
+                    </button>
+                  </form>
+                </div>
+              </div>
               <div class="report-options spacy">
-                <i class="far fa-check-square"></i>
-                <i class="fas fa-trash"></i>
-                <i class="fas fa-minus-circle"></i>
+                <a href="#resolve-report" rel="modal:open">
+                  <i class="far fa-check-square"></i>
+                </a>
+                <a href="#remove-report" rel="modal:open">
+                  <i class="fas fa-minus-circle"></i>
+                </a>
               </div>
             </div>
           </div>
@@ -493,7 +565,6 @@
               </div>
               <div class="report-options spacy">
                 <i class="far fa-check-square"></i>
-                <i class="fas fa-trash"></i>
                 <i class="fas fa-minus-circle"></i>
               </div>
             </div>
@@ -665,7 +736,9 @@
           var r = $(
             '<input name="daterange_n' +
               handle +
-              '" id="daterange_n'+handle+'" type="text" hidden/>'
+              '" id="daterange_n' +
+              handle +
+              '" type="text" hidden/>'
           );
           $("#filters").append(r);
           $("#daterange_n" + handle).val(values[handle]);
