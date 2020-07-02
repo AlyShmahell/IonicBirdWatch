@@ -99,12 +99,12 @@ body {
     padding: 1vh;
 }
 
-.login > input[type=submit] {
+.login>input[type=submit] {
     background-color: #009E0F;
     color: white;
 }
 
-.login > input[type=password] {
+.login>input[type=password] {
     color: #990000;
 }
 
@@ -131,44 +131,18 @@ body {
     grid-area: welcome;
     display: flex;
     flex-direction: row;
-    padding: 1vh;
 }
 
 .welcome * {
     text-decoration: none;
     color: white;
     border-radius: 4px;
-    margin: 10% 10% 10% 10%;
+    margin: 5% 5% 5% 5%;
 }
 
-.welcome-curator {
-    background-color: #a64d79;
-    box-shadow: 0 2px 6px 0 #a64d79;
+.welcome-img {
+    width: 25vh;
 }
-
-.welcome-guest {
-    background-color: #009E0F;
-    box-shadow: 0 2px 6px 0 #009E0F;
-}
-.welcome-curator , .welcome-guest {
-    display: flex;
-    flex-direction: row;
-    width: 50vw;
-    justify-content: space-around;
-}
-
-.welcome-curator *, .welcome-guest * {
-    margin: 1vw;
-}
-
-.welcome-curator:hover{
-    box-shadow: 4px 4px 8px 4px #a64d79;
-
-}
-
-.welcome-guest:hover {
-    box-shadow: 4px 4px 8px 4px #009E0F;
-  }
 
 
 .glow {
@@ -254,7 +228,7 @@ body {
 }
 
 @media screen and (max-width: 480px) {
-    body {
+    .body-app {
         grid-template-columns: auto;
         grid-template-rows: 5vh 9fr auto 5vh;
         grid-template-areas:
@@ -276,7 +250,7 @@ body {
     .login * {
         width: 50vw;
     }
-    
+
 }
 
 .bullseye {
@@ -474,7 +448,18 @@ body {
     justify-content: center;
 }
 
+.report-button {
+    background: none;
+    border: none;
+}
+
+.report-button-i {
+    font-size: 150%;
+}
+
 .row {
+    width: 100%;
     display: flex;
     flex-direction: row;
+    justify-content: space-around;
 }

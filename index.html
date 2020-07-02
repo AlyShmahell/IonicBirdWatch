@@ -44,7 +44,10 @@
       rel="stylesheet"
       href="app.css"
     />
-    <script src="app.js"></script>
+    <script src="header.js"></script>
+    <script src="map.js"></script>
+    <script src="nav.js"></script>
+    <script src="filters.js"></script>
   </head>
   <body class="body-app">
     <div class="header bullseye">
@@ -125,6 +128,7 @@
               <div class="modal">
                 <div id="resolve-report" class="bullseye">
                   <form class="form" action="#" method="PUT">
+                    <h4>Resolve Report</h4>
                     <div class="row">
                       <label for="true"> Resolve Related Reports </label>
                       <input
@@ -143,13 +147,14 @@
                       hidden
                     />
                     <br />
-                    <button type="submit">
-                      <i class="fas fa-paper-plane"></i>
+                    <button type="submit" class="report-button">
+                      <i class="fas fa-paper-plane report-button-i"></i>
                     </button>
                   </form>
                 </div>
                 <div class="bullseye" id="remove-report">
                   <form class="form" action="#" method="DELETE">
+                    <h4>Delete Report</h4>
                     <div class="row">
                       <label for="true"> Delete Related Reports </label>
                       <input
@@ -168,8 +173,8 @@
                       hidden
                     />
                     <br />
-                    <button type="submit">
-                      <i class="fas fa-paper-plane"></i>
+                    <button type="submit" class="report-button">
+                      <i class="fas fa-paper-plane report-button-i"></i>
                     </button>
                   </form>
                 </div>
