@@ -230,7 +230,7 @@ body {
 @media screen and (max-width: 480px) {
     .body-app {
         grid-template-columns: auto;
-        grid-template-rows: 5vh 9fr auto 5vh;
+        grid-template-rows: 6vh 9fr auto 6vh;
         grid-template-areas:
             "header"
             "main"

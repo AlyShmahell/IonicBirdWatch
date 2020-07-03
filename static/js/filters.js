@@ -1,7 +1,4 @@
 $(document).ready(function () {
-
-
-
     daterange.noUiSlider.on("update", function (values, handle) {
         $("#daterange_n" + handle).remove();
         var r = $(
