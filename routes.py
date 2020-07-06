@@ -71,20 +71,21 @@ class Auth(Resource):
                 user = Users.query.filter_by(username=username).first() 
                 if not user or not check_password_hash(user.password, password):
                     return Response(
-                response = json.dumps({
-                    "message": "account does not exist"
-                    }),
-                status=404,
-                mimetype="application/json"
-            )
+                        response = json.dumps({
+                            "message": "account does not exist"
+                            }),
+                        status=404,
+                        mimetype="application/json"
+                    )
                 login_user(user, remember=True)
                 return Response(
-                response = json.dumps({
-                    "message": "success"
-                    }),
-                status=200,
-                mimetype="application/json"
-            )
+                    response = json.dumps({
+                        "message": "success",
+                        'role': user.roles[0].name
+                        }),
+                    status=200,
+                    mimetype="application/json"
+                )
             except:
                 return Response(
                 response = json.dumps({
