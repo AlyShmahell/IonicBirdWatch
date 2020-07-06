@@ -68,9 +68,9 @@
       <div class="flex">
         <div class="modal">
           <form id="filters" class="filters" action="#" method="GET">
-            <label>Interested In</label>
+            <label>Type</label>
             <br />
-            <input type="text" id="interestedin" name="interestedin" />
+            <input type="text" id="type" name="type" />
             <br />
             <br />
             <br />
@@ -83,13 +83,12 @@
               <div id="daterange"></div>
             </div>
             <script>
-              let picker = new TP($("#interestedin")[0]);
+              let picker = new TP($("#type")[0]);
             </script>
           </form>
         </div>
         <div class="command spacy">
-          <i class="fas fa-link"></i>
-          <i class="fas fa-download"></i>
+          <a href="/download"><i class="fas fa-download"></i></a>
           <a href="#filters" rel="modal:open">
             <i class="fas fa-filter whitefront"></i>
           </a>

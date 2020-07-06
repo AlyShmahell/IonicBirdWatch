@@ -370,6 +370,20 @@ body {
     grid-area: report-text;
 }
 
+.report-options,
+.report-options * {
+    color: #990000;
+}
+
+.report-button {
+    background: none;
+    border: none;
+}
+
+.report-button-i {
+    font-size: 150%;
+}
+
 .card-content {
     padding: 2px 16px;
 }
@@ -435,11 +449,6 @@ body {
     width: 30px;
 }
 
-.report-options,
-.report-options * {
-    color: #990000;
-}
-
 .form {
     display: inline-block;
     display: flex;
@@ -448,18 +457,34 @@ body {
     justify-content: center;
 }
 
-.report-button {
-    background: none;
-    border: none;
-}
-
-.report-button-i {
-    font-size: 150%;
-}
-
 .row {
     width: 100%;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+}
+
+
+.slip {
+    border-style: solid;
+    border-width: 4px;
+    border-color: #009E0F;
+    background-color: white;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1%;
+}
+
+.slip * {
+    color: #009E0F;
+}
+
+.slip-button {
+    background: none;
+    border: none;
+}
+
+.slip-button-i {
+    font-size: 150%;
 }
