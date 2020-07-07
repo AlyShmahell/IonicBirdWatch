@@ -60,15 +60,6 @@ def index():
     else:
         return redirect(url_for('welcome'))
 
-def params_enc(parameters):
-    def flatten(d):
-        for k, v in d.items():
-            if isinstance(v, dict):
-                for s, i in flatten(v):
-                    yield '[%s]%s' % (k, s), i
-            else:
-                yield '[%s]' % k, v
-    return {k: v for k, v in flatten(parameters)}
 
 @app.route('/curator')
 @logged_in()
@@ -88,21 +79,31 @@ def curator():
 
 @app.route('/guest')
 def guest():
+    def flatten(d):
+        return "&".join([f"{k}={v}" for k, v in d.items()])
+    print("~"*100)
     print(request.args)
-    if request.args.get('data') is not None:
-        params = json.loads(request.args['data'])
-        params['maxd'] = re.sub('T', ' ', params['maxd'])
-        params['maxd'] = re.sub('Z', ' ', params['maxd'])
-        params['mind'] = re.sub('T', ' ', params['mind'])
-        params['mind'] = re.sub('Z', ' ', params['mind'])
-        params = f"text=\"{params['text']}\"&filters={{\"maxd\":\"{params['maxd']}\",\"mind\":\"{params['mind']}\",\"type\":{[x.encode('ascii') for x in params['type'].split(',')]},\"by\":\"anyone\"}}&location={{\"lon\":{params['lon']},\"lat\":{params['lat']}}},area={int(params['area'])}".encode('ascii')
+    params = request.args.get('data')
+    xhr = None
+    if params is not None:
+        params = json.loads(params)
+        xhr = params.get('xhr')
+        params.pop('xhr')
+        params["text"] = f'"{params["text"]}"'
+        params["type"] = params["type"].split(",")
+        params = flatten(params)
+        print("*"*100)
         print(params)
+        print("*"*100)
     else:
-        params = 'text="awesome"&filters={"maxd": "2018-06-29 08:15:27.243860", "mind": "2018-06-29 08:15:27.243860", "type": ["bird"], "by": "anyone"}&location={"lon": 13, "lat": 42}&area=15'.encode('ascii')
+        params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
+    print(params)
     headers = {"Content-Type": "application/json"}
     response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
     print(response.json())
     wildlife = response.json()['data']
+    if xhr:
+        return render_template('guest-list.html', data=wildlife)
     return render_template('guest.html', data=wildlife)
 
 @app.route('/login', methods=['GET', 'POST'])

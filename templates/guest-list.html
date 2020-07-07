@@ -1,0 +1,52 @@
+{%for wildlife in data%}
+<div class="card">
+  <div class="wildlife">
+    <div class="wildlife-photo">
+      <img src="{{ wildlife.photo }}" alt="Avatar" style="width: 100%;" />
+    </div>
+    <div class="wildlife-distance">
+      <i class="fas fa-map-marker-alt"></i>
+      {{ wildlife.distance }}
+    </div>
+    <div class="wildlife-species">
+      {{ wildlife.species }}
+    </div>
+    <div class="wildlife-type">
+      {{ wildlife.type }}
+    </div>
+    <hr class="wildlife-hr" />
+    <div class="wildlife-notes">
+      {{ wildlife.notes }}
+    </div>
+  </div>
+  <div class="modal">
+    <div id="submit-report" class="bullseye">
+      <form class="form" action="#" method="PUT">
+        <h4>Submit Report</h4>
+        <select name="report-type" placeholder="type">
+          <option value="animal-abuse">Animal Abuse</option>
+          <option value="forest-fire">Forest Fire</option>
+        </select>
+        <input
+          type="text"
+          id="report-notes"
+          name="report-notes"
+          placeholder="notes"
+        />
+        <br />
+        <button type="submit" class="report-button">
+          <i class="fas fa-paper-plane report-button-i"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="slip">
+    <a href="#submit-report" rel="modal:open">
+      <i class="fas fa-flag"></i>
+    </a>
+    <a href="/download/{{wildlife.id}}">
+      <i class="fas fa-arrow-alt-circle-down"></i>
+    </a>
+  </div>
+</div>
+{%endfor%}

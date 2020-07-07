@@ -21,7 +21,7 @@ function add_point(map, center, icon) {
 function objectifyForm(formArray) {//serialize data function
 
   var returnArray = {};
-  for (var i = 0; i < formArray.length; i++){
+  for (var i = 0; i < formArray.length; i++) {
     returnArray[formArray[i]['name']] = formArray[i]['value'];
   }
   return returnArray;
@@ -124,8 +124,7 @@ $(document).ready(function () {
 
   daterange.noUiSlider.on("update", function (values, handle) {
     var key = "maxd";
-    if (handle==0)
-    {
+    if (handle == 0) {
       key = "mind";
     }
     $("#" + key).remove();
@@ -159,18 +158,18 @@ $(document).ready(function () {
     mind.setMonth(mind.getMonth() - data['maxd']);
     data['maxd'] = maxd;
     data['mind'] = mind;
+    data['xhr']  = true;
     data = JSON.stringify(data);
-    console.log("hey", data);
     $.ajax({
       url: "/guest",
-      type: "get", 
-      data: { 
+      type: "get",
+      data: {
         'data': data
       },
-      success: function(response) {
-        //Do Something
+      success: function (response) {
+        $(".list").html(response);
       },
-      error: function(xhr) {
+      error: function (xhr) {
         //Do Something to handle error
       }
     })
