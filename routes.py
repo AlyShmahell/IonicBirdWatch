@@ -203,14 +203,15 @@ class AuthWildLife(Resource):
             info["notes"]    = request.json.get('notes')
             info["photo"]    = request.json.get('photo').encode('utf_8')
             info["date"]     = request.json.get('date')
-            info["location"] = request.json.get('location')
+            info["lon"]      = float(json.loads(request.json.get('lon')))
+            info["lat"]      = float(json.loads(request.json.get('lat')))
         except:
             abort(422, error_message=f"wrong wilflife dictionary keys")
         if any(x 
                for x in info.values() 
                if x == None):
             abort(422, error_message=f"empty wilflife dictionary values")
-        info["date"] = datetime.datetime.strptime(info["date"], '%Y-%m-%d %H:%M:%S.%f')
+        info["date"] = datetime.datetime.strptime(info["date"], '%Y-%m-%dT%H:%M:%S.%fZ')
         wildlife = WildLife.query.filter_by(photo=info["photo"]).first() 
         if wildlife:
             abort(409, error_message=f"wildlife entry already exists")
@@ -219,8 +220,8 @@ class AuthWildLife(Resource):
                                 notes=info["notes"],
                                 photo=info["photo"], 
                                 date=info["date"], 
-                                lat=info["location"]["lat"], 
-                                lon=info["location"]["lon"],
+                                lat=info["lat"], 
+                                lon=info["lon"],
                                 userid=current_user.id)
         db.session.add(new_wildlife)
         db.session.commit()
@@ -236,30 +237,33 @@ class AuthWildLife(Resource):
         info = {}
         try:
             info["text"]     = str(request.args.get('text')).strip("\"")
-            info["filters"]  = json.loads(request.args.get('filters'))
-            info["location"] = json.loads(request.args.get('location'))
-            info["area"]     = int(request.args.get('area'))
+            info["maxd"]     = datetime.datetime.strptime(request.args.get('maxd'), '%Y-%m-%dT%H:%M:%S.%fZ')
+            info["mind"]     = datetime.datetime.strptime(request.args.get('mind'), '%Y-%m-%dT%H:%M:%S.%fZ')
+            info["by"]       = request.args.get('by')
+            info["type"]     = [x.strip() for x in json.loads(request.args.get('type').replace('\'', '\"'))]
+            info["lon"]      = float(request.args.get('lon'))
+            info["lat"]      = float(request.args.get('lat'))
+            info["area"]     = float(request.args.get('area'))
         except:
             abort(422, error_message=f"wrong query keys")
         info = {k:v for k, v in info.items() if v is not None}
-        info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
-        info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
         wildlife = WildLife.query.filter(
                                     (
-                                        (WildLife.lon - info["location"]['lon'])*(WildLife.lon - info["location"]['lon']) + 
-                                        (WildLife.lat  - info["location"]['lat'])*(WildLife.lat  - info["location"]['lat'])
+                                        (WildLife.lon - info['lon'])*(WildLife.lon - info['lon']) + 
+                                        (WildLife.lat  - info['lat'])*(WildLife.lat  - info['lat'])
                                     ) <= info["area"]**2
                                 )\
-                                 .filter(WildLife.date <= info["filters"]['maxd'])\
-                                 .filter(WildLife.date >= info["filters"]['mind'])\
-                                 .filter(or_(*[WildLife.type.like(name) for name in info['filters']['type']]))
-        if info['filters']['by'] == 'me':
+                                 .filter(WildLife.date <= info['maxd'])\
+                                 .filter(WildLife.date >= info['mind'])
+        if not (len(info['type']) == 1 and info['type'][0] == ''):
+            wildlife = wildlife.filter(or_(*[WildLife.type.like(name) for name in info['type']]))
+        if info['by'] == 'me':
             wildlife = wildlife.filter_by(userid = current_user.id)
         wildlife = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in wildlife.all()]
         wf  = []
         doc = []
         for wfo in wildlife:
-            wfo['date']   = wfo['date'].strftime("%Y-%m-%d %H:%M:%S.%f")
+            wfo['date']   = wfo['date'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             wfo['photo']  = wfo['photo'].decode("utf8") 
             wf.append(wfo)  
             doc.append(wfo['notes'])  
@@ -286,7 +290,7 @@ class GuestWildLifeOne(Resource):
             wildlife =  WildLife.query.filter_by(id=wildlifeid).first()
             if wildlife:
                 wildlife = {k: v for k,v in vars(wildlife).items() if not k.startswith('_')}
-                wildlife['date']   = wildlife['date'].strftime("%Y-%m-%d %H:%M:%S.%f")
+                wildlife['date']   = wildlife['date'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 wildlife['photo']  = wildlife['photo'].decode("utf8")
                 return Response(
                 response = json.dumps({
@@ -305,28 +309,31 @@ class GuestWildLifeMany(Resource):
         info = {}
         try:
             info["text"]     = str(request.args.get('text')).strip("\"")
-            info["filters"]  = json.loads(request.args.get('filters'))
-            info["location"] = json.loads(request.args.get('location'))
-            info["area"]     = int(request.args.get('area'))
+            info["maxd"]     = datetime.datetime.strptime(request.args.get('maxd'), '%Y-%m-%dT%H:%M:%S.%fZ')
+            info["mind"]     = datetime.datetime.strptime(request.args.get('mind'), '%Y-%m-%dT%H:%M:%S.%fZ')
+            info["by"]       = request.args.get('by')
+            info["type"]     = [x.strip() for x in json.loads(request.args.get('type').replace('\'', '\"'))]
+            info["lon"]      = float(request.args.get('lon'))
+            info["lat"]      = float(request.args.get('lat'))
+            info["area"]     = float(request.args.get('area'))
         except:
             abort(422, error_message=f"wrong query keys")
         info = {k:v for k, v in info.items() if v is not None}
-        info["filters"]['maxd'] = datetime.datetime.strptime(info["filters"]['maxd'], '%Y-%m-%d %H:%M:%S.%f')
-        info["filters"]['mind'] = datetime.datetime.strptime(info["filters"]['mind'], '%Y-%m-%d %H:%M:%S.%f')
         wildlife = WildLife.query.filter(
                                     (
-                                        (WildLife.lon - info["location"]['lon'])*(WildLife.lon - info["location"]['lon']) + 
-                                        (WildLife.lat  - info["location"]['lat'])*(WildLife.lat  - info["location"]['lat'])
+                                        (WildLife.lon - info['lon'])*(WildLife.lon - info['lon']) + 
+                                        (WildLife.lat  - info['lat'])*(WildLife.lat  - info['lat'])
                                     ) <= info["area"]**2
                                 )\
-                                 .filter(WildLife.date <= info["filters"]['maxd'])\
-                                 .filter(WildLife.date >= info["filters"]['mind'])\
-                                 .filter(or_(*[WildLife.type.like(name) for name in info['filters']['type']]))
+                                 .filter(WildLife.date <= info['maxd'])\
+                                 .filter(WildLife.date >= info['mind'])
+        if not (len(info['type']) == 1 and info['type'][0] == ''):
+            wildlife = wildlife.filter(or_(*[WildLife.type.like(name) for name in info['type']]))
         wildlife = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in wildlife.all()]
         wf  = []
         doc = []
         for wfo in wildlife:
-            wfo['date']   = wfo['date'].strftime("%Y-%m-%d %H:%M:%S.%f")
+            wfo['date']   = wfo['date'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             wfo['photo']  = wfo['photo'].decode("utf8") 
             wf.append(wfo)  
             doc.append(wfo['notes'])  
