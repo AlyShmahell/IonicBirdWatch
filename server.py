@@ -7,7 +7,7 @@ from markupsafe import escape
 import requests
 import argparse
 import functools
-
+import numpy as np 
 
 parser = argparse.ArgumentParser(description='WildWatch Web Server')
 parser.add_argument('--this_ip',   type=str)
@@ -91,17 +91,39 @@ def guest():
         params.pop('xhr')
         params["text"] = f'"{params["text"]}"'
         params["type"] = params["type"].split(",")
+        lon = params['lon']
+        lat = params['lat']
         params = flatten(params)
         print("*"*100)
         print(params)
         print("*"*100)
     else:
         params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
+        lon = 13
+        lat = 42
     print(params)
     headers = {"Content-Type": "application/json"}
     response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
     print(response.json())
     wildlife = response.json()['data']
+    for entry in wildlife:
+        from math import sin, cos, sqrt, atan2, radians
+        R = 6378137
+
+        lat1 = radians(entry['lat'])
+        lon1 = radians(entry['lon'])
+        lat2 = radians(lat)
+        lon2 = radians(lon)
+
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        entry['distance'] = np.round(R * c, 1)
+        entry['center'] = [entry['lon'], entry['lat']]
+        entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
     if xhr:
         return render_template('guest-list.html', data=wildlife)
     return render_template('guest.html', data=wildlife)

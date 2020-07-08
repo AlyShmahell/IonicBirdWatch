@@ -1,9 +1,12 @@
 {%for wildlife in data%}
-<div class="card">
+<div class="card" id="{{wildlife.cardid}}">
   <div class="wildlife">
     <div class="wildlife-photo">
       <img src="{{ wildlife.photo }}" alt="Avatar" style="width: 100%;" />
     </div>
+    <a href="#" class="add_marker" hidden>
+      {{wildlife.center}}
+    </a>
     <div class="wildlife-distance">
       <i class="fas fa-map-marker-alt"></i>
       {{ wildlife.distance }}

@@ -78,19 +78,33 @@
               <div id="daterange"></div>
             </div>
             <script>
-              let picker = new TP($("#type")[0]);
+              let picker = new TP($("#type")[0], {
+                escape: [
+                  // Modern browser(s)
+                  ",",
+                  " ",
+                  "\t",
+                  "\n",
+                  // Legacy browser(s)
+                  188,
+                  32,
+                  9,
+                  13,
+                ],
+                x: true
+              });
             </script>
           </form>
         </div>
         <div class="command spacy">
-          <a href="download"><i class="fas fa-download"></i></a>
+          <a href="download"><i class="fas fa-download whitefront"></i></a>
           <a href="#filters" rel="modal:open">
             <i class="fas fa-filter whitefront"></i>
           </a>
         </div>
         <div class="list">
           {%for wildlife in data%}
-          <div class="card">
+          <div class="card" id="{{wildlife.cardid}}">
             <div class="wildlife">
               <div class="wildlife-photo">
                 <img
@@ -99,6 +113,9 @@
                   style="width: 100%;"
                 />
               </div>
+              <a href="#" class="add_marker"  hidden>
+                {{wildlife.center}}
+              </a>
               <div class="wildlife-distance">
                 <i class="fas fa-map-marker-alt"></i>
                 {{ wildlife.distance }}
