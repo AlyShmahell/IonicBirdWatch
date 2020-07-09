@@ -77,7 +77,7 @@ class Auth(Resource):
                         status=404,
                         mimetype="application/json"
                     )
-                login_user(user, remember=True)
+                login_user(user, remember=True, force=True)
                 return Response(
                     response = json.dumps({
                         "message": "success",
