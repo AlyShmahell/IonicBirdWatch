@@ -8,6 +8,21 @@ import requests
 import argparse
 import functools
 import numpy as np 
+from math import sin, cos, sqrt, atan2, radians
+
+
+def calc_distance(p1_lon, p1_lat, p2_lon, p2_lat):
+        R    = 6378137
+        lat1 = radians(p1_lat)
+        lon1 = radians(p1_lon)
+        lat2 = radians(p2_lat)
+        lon2 = radians(p2_lon)
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+        a    = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c    = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return np.round(R * c, 1)
+
 
 parser = argparse.ArgumentParser(description='WildWatch Web Server')
 parser.add_argument('--this_ip',   type=str)
@@ -106,22 +121,8 @@ def guest():
     response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
     print(response.json())
     wildlife = response.json()['data']
-    for entry in wildlife:
-        from math import sin, cos, sqrt, atan2, radians
-        R = 6378137
-
-        lat1 = radians(entry['lat'])
-        lon1 = radians(entry['lon'])
-        lat2 = radians(lat)
-        lon2 = radians(lon)
-
-        dlon = lon2 - lon1
-        dlat = lat2 - lat1
-
-        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        entry['distance'] = np.round(R * c, 1)
+    for entry in wildlife:        
+        entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
         entry['center'] = [entry['lon'], entry['lat']]
         entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
     if xhr:
