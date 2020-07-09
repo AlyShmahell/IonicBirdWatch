@@ -169,14 +169,13 @@ $(document).ready(function () {
       });
     if (feature) {
       var coordinate = evt.coordinate;
-      content.innerHTML =
-        "<p>You clicked here:</p><code>" + "</code>";
+      content.innerHTML = "<code></code>";
       if ($("#" + feature.get('center')).get(0) != undefined) {
         $("#" + feature.get('center')).get(0).scrollIntoView();
         $("#" + feature.get('center')).clone().appendTo($("#popup-content"));
         overlay.setPosition(coordinate);
       }
-      else{
+      else {
         overlay.setPosition(undefined);
         closer.blur();
       }
@@ -192,6 +191,17 @@ $(document).ready(function () {
   $(".ol-zoom").prepend(r);
 
 
+
+  var daterange = $("#daterange")[0];
+  noUiSlider.create(daterange, {
+    start: [20, 80],
+    tooltips: [wNumb({ decimals: 1 }), true],
+    connect: true,
+    range: {
+      min: 0,
+      max: 100,
+    },
+  });
   daterange.noUiSlider.on("update", function (values, handle) {
     var key = "maxd";
     if (handle == 0) {

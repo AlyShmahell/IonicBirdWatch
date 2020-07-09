@@ -22,14 +22,4 @@ $(document).ready(function () {
             easing: "easeOutExpo",
             delay: 10000,
         });
-    var daterange = $("#daterange")[0];
-    noUiSlider.create(daterange, {
-        start: [20, 80],
-        tooltips: [wNumb({ decimals: 1 }), true],
-        connect: true,
-        range: {
-            min: 0,
-            max: 100,
-        },
-    });
 });

@@ -10,6 +10,21 @@ import functools
 import numpy as np 
 from math import sin, cos, sqrt, atan2, radians
 
+class Borg:
+    _shared_state = {}
+    def __init__(self):
+        self.__dict__ = self._shared_state
+
+class Singleton(Borg):
+    def __init__(self, key=None, val=None):
+        Borg.__init__(self)
+        if key is not None and val is not None:
+            self.__setattr__(key, val)
+    def pop(self, key):
+        if key in self.__dict__:
+            delattr(self, key)
+    def __repr__(self):
+        return f"{vars(self)}"
 
 def calc_distance(p1_lon, p1_lat, p2_lon, p2_lat):
         R    = 6378137
@@ -49,11 +64,12 @@ def logged_in(role=None):
     return decorator
 
 def login_user():
+    Singleton('sess', requests.Session())
     data = {
         'username': request.form['username'],
         'password': request.form['password']
     }
-    response = requests.post(f'{args.rest_ip}:{args.rest_port}/auth', json = data)
+    response = Singleton().sess.post(f'{args.rest_ip}:{args.rest_port}/auth', json = data)
     if response.status_code == 200:
         role = response.json()['role']
         print(role)
@@ -61,11 +77,13 @@ def login_user():
             session['role'] = role
             return True
     session['role'] = None
+    Singleton().pop('sess')
     return False
 
 
 def logout_user():
     session.pop('role', None)
+    Singleton().pop('sess')
 
 
 @app.route('/')
@@ -79,17 +97,39 @@ def index():
 @app.route('/curator')
 @logged_in()
 def curator():
-    params = {
-        'text':'awesome',
-        'location':{'lon': 13, 'lat': 42},
-        'area':15,
-        'filters':{'maxd': '2018-06-29 08:15:27.243860', 'mind': '2018-06-29 08:15:27.243860', 'type': ['bird'], 'by': 'anyone'}
-    }
+    def flatten(d):
+        return "&".join([f"{k}={v}" for k, v in d.items()])
+    print("~"*100)
+    print(request.args)
+    params = request.args.get('data')
+    xhr = None
+    if params is not None:
+        params = json.loads(params)
+        xhr = params.get('xhr')
+        params.pop('xhr')
+        params["text"] = f'"{params["text"]}"'
+        params["type"] = params["type"].split(",")
+        lon = params['lon']
+        lat = params['lat']
+        params = flatten(params)
+        print("*"*100)
+        print(params)
+        print("*"*100)
+    else:
+        params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
+        lon = 13
+        lat = 42
+    print(params)
     headers = {"Content-Type": "application/json"}
-    print(params_enc(params))
-    response = requests.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params_enc(params), headers=headers)
+    response = Singleton().sess.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params, headers=headers)
     print(response.json())
     wildlife = response.json()['data']
+    for entry in wildlife:        
+        entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
+        entry['center'] = [entry['lon'], entry['lat']]
+        entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
+    if xhr:
+        return render_template('curator-list.html', data=wildlife)
     return render_template('curator.html', data=wildlife)
 
 @app.route('/guest')
@@ -132,8 +172,9 @@ def guest():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        login_user()
-        return redirect(url_for('curator'))
+        status = login_user()
+        if status:
+            return redirect(url_for('curator'))
     return render_template('login.html')
 
 @app.route('/logout')
