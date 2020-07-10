@@ -70,6 +70,13 @@ class Reports(db.Model):
     resolved   = db.Column(db.Boolean)
 
 
+class ReportCodes(db.Model):
+    __tablename__ = 'reportcodes'
+    id         = db.Column(db.Integer, primary_key=True)
+    name       = db.Column(db.String(300), nullable=False)
+
+
+
 """@db.event.listens_for(Users, "before_insert")
 def insert_order_to_printer(mapper, connection, target):
     pass"""

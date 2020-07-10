@@ -6,7 +6,7 @@ from flask_login import login_required, current_user, login_user, logout_user
 from werkzeug.exceptions import Unauthorized
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.datastructures import Headers
-from models import Users, Roles, WildLife, Reports, db, login_manager, authorize
+from models import Users, Roles, WildLife, Reports, ReportCodes, db, login_manager, authorize
 from sqlalchemy import or_
 from search import *
 import functools
@@ -257,7 +257,7 @@ class AuthWildLife(Resource):
                                  .filter(WildLife.date >= info['mind'])
         if not (len(info['type']) == 1 and info['type'][0] == ''):
             wildlife = wildlife.filter(or_(*[WildLife.type.like(name) for name in info['type']]))
-        if info['by'] == 'me':
+        if info.get('by') == 'me':
             wildlife = wildlife.filter_by(userid = current_user.id)
         wildlife = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in wildlife.all()]
         wf  = []
@@ -272,9 +272,11 @@ class AuthWildLife(Resource):
             wf = [x for (i,x) in enumerate(wf) if i in se]
         if bool(authorize.has_role('curator')):
             for wfo in wf:
-                reports = Reports.query.filter(Reports.wildlifeid == wfo['id'])\
+                reports = Reports.query.join(ReportCodes, ReportCodes.id==Reports.code)\
+                                       .add_columns(ReportCodes.name, Reports.code, Reports.text, Reports.id)\
+                                       .filter(Reports.wildlifeid == wfo['id'])\
                                        .filter(Reports.resolved   != True)
-                reports = [{k: v for k,v in vars(a).items() if not k.startswith('_')} for a in reports.all()]
+                reports = [{'code': a.code, 'title': a.name, 'text': a.text, 'id': a.id} for a in reports]
                 wfo['reports'] = reports
         return Response(
                 response = json.dumps({
@@ -388,7 +390,12 @@ class AuthReport(Resource):
     @has_role('curator')
     def put(self, reportid):
         reportid = int(reportid)
-        cascade  = bool(request.args.get('cascade')) if request.args.get('cascade') is not None else False
+        for idx, container in enumerate([request.form, request.json, request.args]):
+            if len(container) > 0 and 'cascade' in container:
+                cascade = json.loads(container.get('cascade').lower())
+                break
+        if cascade is None:
+            cascade = False
         report = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).first()
         if not report:
             abort(404, error_message=f"report entry does not exist")
@@ -415,7 +422,12 @@ class AuthReport(Resource):
     @login_required
     @has_role('curator')
     def delete(self, reportid):
-        cascade    = bool(request.args.get('cascade')) if request.args.get('cascade') is not None else False
+        for idx, container in enumerate([request.form, request.json, request.args]):
+            if len(container) > 0 and 'cascade' in container:
+                cascade = json.loads(container.get('cascade').lower())
+                break
+        if cascade is None:
+            cascade = False
         report = Reports.query.filter_by(id = reportid).first()
         try:
             wildlifeid = report.wildlifeid
@@ -423,13 +435,15 @@ class AuthReport(Resource):
             db.session.commit()
         except:
             abort(404, error_message=f"report entry does not exist")
+        print(wildlifeid)
         if cascade:
             try:
                 try:
-                    wildlife = WildLife.query.filter_by(id=wildlifeid)
+                    wildlife = WildLife.query.filter_by(id=wildlifeid).first()
                     db.session.delete(wildlife)
                     db.session.commit()
                 except:
+                    print('could not delete')
                     pass
                 reports = Reports.query.filter(Reports.wildlifeid == wildlifeid).delete()
                 db.session.commit()

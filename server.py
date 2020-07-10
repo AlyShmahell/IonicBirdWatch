@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import Roles, db, authorize, login_manager
+from models import Roles, Users, ReportCodes, db, authorize, login_manager
 from routes import (Auth, 
                     AuthProfile, 
                     AuthProfileCat, 
@@ -34,7 +34,6 @@ if __name__ == '__main__':
     api.add_resource(GuestWildLifeOne,  '/guest/wildlife/<int:wildlifeid>')
     api.add_resource(GuestReport,       '/guest/report')
 
-    
     if not os.path.exists('db.sqlite'):
         with app.app_context():
             db.create_all()
@@ -45,5 +44,22 @@ if __name__ == '__main__':
             new_role = Roles(id=2, 
                              name='user')
             db.session.add(new_role)
+            db.session.commit()
+            new_user = Users(username='curator', 
+                             fullname='curator', 
+                             password=generate_password_hash('curator', 
+                                                                method='sha256'))
+            db.session.add(new_user)
+            db.session.commit()
+            userole = Roles.query.filter_by(name = 'curator').first()
+            new_user.roles.append(userole)
+            db.session.commit()
+            reportcode = ReportCodes(id=0, 
+                                     name='Wild Fire')
+            db.session.add(reportcode)
+            db.session.commit()
+            reportcode = ReportCodes(id=1, 
+                                     name='Animal Abuse')
+            db.session.add(reportcode)
             db.session.commit()
     app.run(debug=True, host = '127.0.0.1', port=5001)
