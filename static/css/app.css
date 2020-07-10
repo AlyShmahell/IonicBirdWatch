@@ -459,6 +459,10 @@ body {
     align-items: center;
     justify-content: center;
 }
+.form * {
+    margin: 1vh;
+    width: 100%;
+}
 
 .row {
     width: 100%;

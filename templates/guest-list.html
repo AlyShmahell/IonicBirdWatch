@@ -23,19 +23,22 @@
     </div>
   </div>
   <div class="modal">
-    <div id="submit-report" class="bullseye">
-      <form class="form" action="#" method="PUT">
+    <div id="submit-report-{{wildlife.id}}" class="bullseye">
+      <form class="form" onsubmit="submit_report(event)">
         <h4>Submit Report</h4>
-        <select name="report-type" placeholder="type">
-          <option value="animal-abuse">Animal Abuse</option>
-          <option value="forest-fire">Forest Fire</option>
+        <select name="code" placeholder="type">
+          <option value=1>Animal Abuse</option>
+          <option value=0>Forest Fire</option>
         </select>
         <input
           type="text"
           id="report-notes"
-          name="report-notes"
+          name="text"
           placeholder="notes"
+          autocomplete="off"
         />
+        <input type="number" name="wildlifeid" hidden value="{{wildlife.id}}"/>
+        <a href="#" rel="modal:close" id="closereport" hidden>Close</a>
         <br />
         <button type="submit" class="report-button">
           <i class="fas fa-paper-plane report-button-i"></i>
@@ -44,7 +47,7 @@
     </div>
   </div>
   <div class="slip">
-    <a href="#submit-report" rel="modal:open">
+    <a href="#submit-report-{{wildlife.id}}" rel="modal:open">
       <i class="fas fa-flag"></i>
     </a>
     <a href="/download/{{wildlife.id}}">

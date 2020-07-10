@@ -52,6 +52,7 @@
     <script src="/static/js/nav.js"></script>
   </head>
   <body class="body-app">
+    <p hidden id="url">/curator</p>
     <div class="header bullseye">
       <h1 class="ml2">
         Wild Watch
@@ -141,12 +142,12 @@
                   {{ report.code }}
                 </div>
                 <div class="report-text">
-                  {{ report.notes }}
+                  {{ report.text }}
                 </div>
               </div>
               <div class="modal">
-                <div id="resolve-report" class="bullseye">
-                  <form class="form" action="#" method="PUT">
+                <div id="resolve-report-{{report.id}}" class="bullseye">
+                  <form class="form" onsubmit="resolve_report(event)">
                     <h4>Resolve Report</h4>
                     <div class="row">
                       <label for="true"> Resolve Related Reports </label>
@@ -154,25 +155,18 @@
                         type="radio"
                         id="true"
                         name="cascade"
-                        value="true"
                       />
                     </div>
-                    <input
-                      type="radio"
-                      id="false"
-                      name="cascade"
-                      value="false"
-                      checked
-                      hidden
-                    />
                     <br />
+                    <input type="number" name="id" hidden value="{{report.id}}"/>
+                    <a href="#" rel="modal:close" id="closereport" hidden>Close</a>
                     <button type="submit" class="report-button">
                       <i class="fas fa-paper-plane report-button-i"></i>
                     </button>
                   </form>
                 </div>
-                <div class="bullseye" id="remove-report">
-                  <form class="form" action="#" method="DELETE">
+                <div class="bullseye" id="remove-report-{{report.id}}">
+                  <form class="form" onsubmit="remove_report(event)">
                     <h4>Delete Report</h4>
                     <div class="row">
                       <label for="true"> Delete Related Reports </label>
@@ -180,18 +174,11 @@
                         type="radio"
                         id="true"
                         name="cascade"
-                        value="true"
                       />
                     </div>
-                    <input
-                      type="radio"
-                      id="false"
-                      name="cascade"
-                      value="false"
-                      checked
-                      hidden
-                    />
                     <br />
+                    <input type="number" name="id" hidden value="{{report.id}}"/>
+                    <a href="#" rel="modal:close" id="closereport" hidden>Close</a>
                     <button type="submit" class="report-button">
                       <i class="fas fa-paper-plane report-button-i"></i>
                     </button>
@@ -199,10 +186,10 @@
                 </div>
               </div>
               <div class="report-options spacy">
-                <a href="#resolve-report" rel="modal:open">
+                <a href="#resolve-report-{{report.id}}" rel="modal:open">
                   <i class="far fa-check-square"></i>
                 </a>
-                <a href="#remove-report" rel="modal:open">
+                <a href="#remove-report-{{report.id}}" rel="modal:open">
                   <i class="fas fa-minus-circle"></i>
                 </a>
               </div>

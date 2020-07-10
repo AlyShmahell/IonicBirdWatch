@@ -1,14 +1,11 @@
 markers = [];
 
 function add_point(map, center, icon, pos) {
-  console.log(center);
 
   for (var i = 0; i < center.length; i++) {
     center[i] = Number(center[i]),
       center[i] = center[i].toFixed(1);
   }
-  console.log(center);
-  console.log('ns: ', center.join('_').replace(/\./g, '_'));
   var geometry = new ol.geom.Point(ol.proj.fromLonLat(center));
   var iconFeature = new ol.Feature({
     geometry: geometry,
@@ -32,16 +29,13 @@ function add_point(map, center, icon, pos) {
 }
 
 function remove_points(map) {
-  console.log('markers: ');
-  console.log('markers: ', markers.length);
   for (var i = 0; i < markers.length; i++) {
     map.removeLayer(markers[i]);
   }
 
 }
 
-function objectifyForm(formArray) {//serialize data function
-
+function objectifyForm(formArray) {
   var returnArray = {};
   for (var i = 0; i < formArray.length; i++) {
     returnArray[formArray[i]['name']] = formArray[i]['value'];
@@ -50,7 +44,7 @@ function objectifyForm(formArray) {//serialize data function
 }
 
 
-function refresh(map) {
+function refresh(map, url) {
   var data = objectifyForm($("#filters").serializeArray());
   var radlonlat = calc_radius(map);
   data['area'] = radlonlat[0];
@@ -65,7 +59,7 @@ function refresh(map) {
   data['xhr'] = true;
   data = JSON.stringify(data);
   $.ajax({
-    url: "/guest",
+    url: url,
     type: "get",
     data: {
       'data': data
@@ -74,12 +68,8 @@ function refresh(map) {
       remove_points(map);
       $(".list").html(response);
       $(".add_marker").each(function () {
-        console.log(JSON.parse(this.text));
         add_point(map, JSON.parse(this.text), '/static/img/marker.png', false);
       });
-    },
-    error: function (xhr) {
-      //Do Something to handle error
     }
   })
 }
@@ -95,13 +85,12 @@ function calc_radius(map) {
   center = ol.proj.transform(center, sourceProj, 'EPSG:4326');
   var centerToSW = ol.sphere.getDistance(center, posSW, radius = 6378137);
   var centerToNE = ol.sphere.getDistance(center, posNE, radius = 6378137);
-  console.log("centerToSW - ", centerToSW);
-  console.log("centerToNE - ", centerToNE);
   return [centerToNE, extent[0], extent[1]];
 }
 
 
 $(document).ready(function () {
+  var url = $('#url').text().trim();
   var container = document.getElementById("popup");
   var content = document.getElementById("popup-content");
   var closer = document.getElementById("popup-closer");
@@ -109,9 +98,7 @@ $(document).ready(function () {
   var geolocation = navigator.geolocation;
   geolocation.getCurrentPosition((resp) => {
     center = [resp.coords.longitude, resp.coords.latitude];
-    console.log("set coordinate", center);
   }, (error) => {
-    console.log('Error getting location', error);
   });
   var view = new ol.View({
     center: ol.proj.fromLonLat(center),
@@ -151,10 +138,9 @@ $(document).ready(function () {
   calc_radius(map);
   geolocation.watchPosition((data) => {
     center = [data.coords.longitude, data.coords.latitude];
-    console.log("changed coordinate", center);
     view.setCenter(ol.proj.fromLonLat(center));
     geometry.setCoordinates(ol.proj.fromLonLat(center));
-  }, (error) => { console.log(error) });
+  }, (error) => {  });
   var search = new ol.control.Search({
     getTitle: function (f) {
       return f.name;
@@ -226,9 +212,8 @@ $(document).ready(function () {
     }
   });
   function log_modal_event(event, modal) {
-    if (typeof console != 'undefined' && console.log) console.log("[event] " + event.type);
     if (event.type == 'modal:close') {
-      refresh(map);
+      refresh(map, url);
     }
   };
   $(document).on($.modal.BEFORE_CLOSE, log_modal_event);
@@ -236,11 +221,57 @@ $(document).ready(function () {
   $(document).on($.modal.AFTER_CLOSE, log_modal_event);
   $("#filters").on("submit", function (event) {
     event.preventDefault();
-    refresh(map);
+    refresh(map, url);
   });
   $(".add_marker").each(function () {
-    console.log(JSON.parse(this.text));
     add_point(map, JSON.parse(this.text), '/static/img/marker.png', false);
   });
+  $('#closereport').on('click',
+    function() {
+      refresh(map, url);
+    }
+  )
 });
 
+function submit_report(event) {
+  event.preventDefault();
+  data = {
+    'code':       event.target.elements.code.value,
+    'text':       event.target.elements.text.value,
+    'wildlifeid': event.target.elements.wildlifeid.value
+  }
+  $.ajax({
+    url: "/report-submit",
+    type: "post",
+    data: data
+  });
+  $('#closereport').trigger('click');
+}
+
+function resolve_report(event) {
+  event.preventDefault();
+  data = {
+    'cascade':       event.target.elements.cascade.checked
+  }
+  var id = event.target.elements.id.value;
+  $.ajax({
+    url: "/report-resolve/"+id,
+    type: "put",
+    data: data
+  });
+  $('#closereport').trigger('click');
+}
+
+function remove_report(event) {
+  event.preventDefault();
+  data = {
+    'cascade':       event.target.elements.cascade.checked
+  }
+  var id = event.target.elements.id.value;
+  $.ajax({
+    url: "/report-remove/"+id,
+    type: "delete",
+    data: data
+  });
+  $('#closereport').trigger('click');
+}

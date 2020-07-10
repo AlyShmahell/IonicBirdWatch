@@ -55,6 +55,8 @@ def logged_in(role=None):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
+            if 'role' not in session:
+                return redirect(url_for('login'))
             if session['role'] is not None:
                 value = func(*args, **kwargs)
                 return value
@@ -72,8 +74,7 @@ def login_user():
     response = Singleton().sess.post(f'{args.rest_ip}:{args.rest_port}/auth', json = data)
     if response.status_code == 200:
         role = response.json()['role']
-        print(role)
-        if role == 'user':
+        if role == 'curator':
             session['role'] = role
             return True
     session['role'] = None
@@ -99,8 +100,6 @@ def index():
 def curator():
     def flatten(d):
         return "&".join([f"{k}={v}" for k, v in d.items()])
-    print("~"*100)
-    print(request.args)
     params = request.args.get('data')
     xhr = None
     if params is not None:
@@ -112,20 +111,19 @@ def curator():
         lon = params['lon']
         lat = params['lat']
         params = flatten(params)
-        print("*"*100)
-        print(params)
-        print("*"*100)
     else:
         params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
         lon = 13
         lat = 42
-    print(params)
     headers = {"Content-Type": "application/json"}
     response = Singleton().sess.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params, headers=headers)
-    print(response.json())
     wildlife = response.json()['data']
     for entry in wildlife:        
         entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
+        if entry['distance'] > 1000:
+            entry['distance'] = f"{round(entry['distance']/1000)}km"
+        else:
+            entry['distance'] = f"{entry['distance']}m"
         entry['center'] = [entry['lon'], entry['lat']]
         entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
     if xhr:
@@ -136,8 +134,6 @@ def curator():
 def guest():
     def flatten(d):
         return "&".join([f"{k}={v}" for k, v in d.items()])
-    print("~"*100)
-    print(request.args)
     params = request.args.get('data')
     xhr = None
     if params is not None:
@@ -149,20 +145,19 @@ def guest():
         lon = params['lon']
         lat = params['lat']
         params = flatten(params)
-        print("*"*100)
-        print(params)
-        print("*"*100)
     else:
         params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
         lon = 13
         lat = 42
-    print(params)
     headers = {"Content-Type": "application/json"}
     response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
-    print(response.json())
     wildlife = response.json()['data']
     for entry in wildlife:        
         entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
+        if entry['distance'] > 1000:
+            entry['distance'] = f"{round(entry['distance']/1000)}km"
+        else:
+            entry['distance'] = f"{entry['distance']}m"
         entry['center'] = [entry['lon'], entry['lat']]
         entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
     if xhr:
@@ -176,6 +171,34 @@ def login():
         if status:
             return redirect(url_for('curator'))
     return render_template('login.html')
+
+@app.route('/report-submit', methods=['POST'])
+def report_submit():
+    data = {
+        'code': request.form['code'],
+        'text': request.form['text'],
+        'wildlifeid': request.form['wildlifeid']
+    }
+    response = requests.post(f'{args.rest_ip}:{args.rest_port}/guest/report', json = data)
+    return response.json()
+
+@app.route('/report-resolve/<int:reportid>', methods=['PUT'])
+@logged_in()
+def report_resolve(reportid):
+    data = {
+        'cascade': request.form['cascade']
+    }
+    response = Singleton().sess.put(f'{args.rest_ip}:{args.rest_port}/auth/report/{reportid}', json = data)
+    return response.json()
+
+@app.route('/report-remove/<int:reportid>', methods=['DELETE'])
+@logged_in()
+def report_remove(reportid):
+    data = {
+        'cascade': request.form['cascade']
+    }
+    response = Singleton().sess.delete(f'{args.rest_ip}:{args.rest_port}/auth/report/{reportid}', json = data)
+    return response.json()
 
 @app.route('/logout')
 def logout():
