@@ -9,6 +9,8 @@ import argparse
 import functools
 import numpy as np 
 from math import sin, cos, sqrt, atan2, radians
+import datetime 
+from dateutil.relativedelta import relativedelta
 
 class Borg:
     _shared_state = {}
@@ -111,24 +113,22 @@ def curator():
         lon = params['lon']
         lat = params['lat']
         params = flatten(params)
+        headers = {"Content-Type": "application/json"}
+        response = Singleton().sess.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params, headers=headers)
+        wildlife = response.json()['data']
+        for entry in wildlife:        
+            entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
+            if entry['distance'] > 1000:
+                entry['distance'] = f"{round(entry['distance']/1000)}km"
+            else:
+                entry['distance'] = f"{entry['distance']}m"
+            entry['center'] = [entry['lon'], entry['lat']]
+            entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
+        if xhr:
+            return render_template('curator-list.html', data=wildlife)
     else:
-        params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
-        lon = 13
-        lat = 42
-    headers = {"Content-Type": "application/json"}
-    response = Singleton().sess.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params, headers=headers)
-    wildlife = response.json()['data']
-    for entry in wildlife:        
-        entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
-        if entry['distance'] > 1000:
-            entry['distance'] = f"{round(entry['distance']/1000)}km"
-        else:
-            entry['distance'] = f"{entry['distance']}m"
-        entry['center'] = [entry['lon'], entry['lat']]
-        entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
-    if xhr:
-        return render_template('curator-list.html', data=wildlife)
-    return render_template('curator.html', data=wildlife)
+        wildlife = []
+        return render_template('curator.html', data=wildlife)
 
 @app.route('/guest')
 def guest():
@@ -145,24 +145,22 @@ def guest():
         lon = params['lon']
         lat = params['lat']
         params = flatten(params)
+        headers = {"Content-Type": "application/json"}
+        response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
+        wildlife = response.json()['data']
+        for entry in wildlife:        
+            entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
+            if entry['distance'] > 1000:
+                entry['distance'] = f"{round(entry['distance']/1000)}km"
+            else:
+                entry['distance'] = f"{entry['distance']}m"
+            entry['center'] = [entry['lon'], entry['lat']]
+            entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
+        if xhr:
+            return render_template('guest-list.html', data=wildlife)
     else:
-        params = 'text="awesome"&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=["bird"]&by=anyone&lon=13&lat=42&area=15'.encode('ascii')
-        lon = 13
-        lat = 42
-    headers = {"Content-Type": "application/json"}
-    response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
-    wildlife = response.json()['data']
-    for entry in wildlife:        
-        entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
-        if entry['distance'] > 1000:
-            entry['distance'] = f"{round(entry['distance']/1000)}km"
-        else:
-            entry['distance'] = f"{entry['distance']}m"
-        entry['center'] = [entry['lon'], entry['lat']]
-        entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
-    if xhr:
-        return render_template('guest-list.html', data=wildlife)
-    return render_template('guest.html', data=wildlife)
+        wildlife = []
+        return render_template('guest.html', data=wildlife)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -213,13 +211,9 @@ def welcome():
 
 @app.route('/download/<string:wildlifeid>')
 def download(wildlifeid):
-    wildlife = {'data':[{
-        'photo': '/static/img/icon.png',
-        'distance': '5m',
-        'species': 'Birdillia',
-        'type': 'Bird',
-        'notes': 'cute bird'
-    } for _ in range(1)]}
+    headers = {"Content-Type": "application/json"}
+    response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife/{wildlifeid}', headers=headers)
+    wildlife = response.json()['data']
     temp = BytesIO()
     with zipfile.ZipFile(temp, 'w') as zf:
         data               = zipfile.ZipInfo('data.json')
@@ -234,13 +228,22 @@ def download(wildlifeid):
 
 @app.route('/download')
 def downloadall():
-    wildlife = {'data':[{
-        'photo': '/static/img/icon.png',
-        'distance': '5m',
-        'species': 'Birdillia',
-        'type': 'Bird',
-        'notes': 'cute bird'
-    } for _ in range(3)]}
+    def flatten(d):
+        return "&".join([f"{k}={v}" for k, v in d.items()])
+    params = request.args.get('data')
+    xhr = None
+    if params is not None:
+        params = json.loads(params)
+        xhr = params.get('xhr')
+        params.pop('xhr')
+        params["text"] = f'"{params["text"]}"'
+        params["type"] = params["type"].split(",")
+        lon = params['lon']
+        lat = params['lat']
+        params = flatten(params)
+        headers = {"Content-Type": "application/json"}
+        response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
+        wildlife = response.json()['data']
     temp = BytesIO()
     with zipfile.ZipFile(temp, 'w') as zf:
         data               = zipfile.ZipInfo('data.json')

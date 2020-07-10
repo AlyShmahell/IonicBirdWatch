@@ -140,7 +140,8 @@ $(document).ready(function () {
     center = [data.coords.longitude, data.coords.latitude];
     view.setCenter(ol.proj.fromLonLat(center));
     geometry.setCoordinates(ol.proj.fromLonLat(center));
-  }, (error) => {  });
+    refresh(map, url);
+  }, (error) => { });
   var search = new ol.control.Search({
     getTitle: function (f) {
       return f.name;
@@ -180,7 +181,7 @@ $(document).ready(function () {
 
   var daterange = $("#daterange")[0];
   noUiSlider.create(daterange, {
-    start: [20, 80],
+    start: [0, 100],
     tooltips: [wNumb({ decimals: 1 }), true],
     connect: true,
     range: {
@@ -227,17 +228,50 @@ $(document).ready(function () {
     add_point(map, JSON.parse(this.text), '/static/img/marker.png', false);
   });
   $('#closereport').on('click',
-    function() {
+    function () {
       refresh(map, url);
     }
   )
+  $('#downloadall').click(function () {
+    var data = objectifyForm($("#filters").serializeArray());
+    var radlonlat = calc_radius(map);
+    data['area'] = radlonlat[0];
+    data['lon'] = radlonlat[1];
+    data['lat'] = radlonlat[2];
+    var maxd = new Date();
+    maxd.setMonth(maxd.getMonth() - data['mind']);
+    var mind = new Date();
+    mind.setMonth(mind.getMonth() - data['maxd']);
+    data['maxd'] = maxd;
+    data['mind'] = mind;
+    data['xhr'] = true;
+    data = JSON.stringify(data);
+    $.ajax({
+      url: "/download",
+      type: "get",
+      data: {
+        'data': data
+      },
+      xhrFields: {
+        responseType: 'blob'
+      },
+      success: function (response) {
+        console.log(response);
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(response);
+        link.download = 'data.zip';
+        link.click();
+      }
+    });
+  })
+  refresh(map, url);
 });
 
 function submit_report(event) {
   event.preventDefault();
   data = {
-    'code':       event.target.elements.code.value,
-    'text':       event.target.elements.text.value,
+    'code': event.target.elements.code.value,
+    'text': event.target.elements.text.value,
     'wildlifeid': event.target.elements.wildlifeid.value
   }
   $.ajax({
@@ -251,11 +285,11 @@ function submit_report(event) {
 function resolve_report(event) {
   event.preventDefault();
   data = {
-    'cascade':       event.target.elements.cascade.checked
+    'cascade': event.target.elements.cascade.checked
   }
   var id = event.target.elements.id.value;
   $.ajax({
-    url: "/report-resolve/"+id,
+    url: "/report-resolve/" + id,
     type: "put",
     data: data
   });
@@ -265,11 +299,11 @@ function resolve_report(event) {
 function remove_report(event) {
   event.preventDefault();
   data = {
-    'cascade':       event.target.elements.cascade.checked
+    'cascade': event.target.elements.cascade.checked
   }
   var id = event.target.elements.id.value;
   $.ajax({
-    url: "/report-remove/"+id,
+    url: "/report-remove/" + id,
     type: "delete",
     data: data
   });
