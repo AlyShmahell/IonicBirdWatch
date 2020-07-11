@@ -22,7 +22,7 @@ export class SlideDrawerComponent implements OnInit {
       breaks: {
         top: {
           enabled: true,
-          height: window.screen.height - (135 * 0.35)
+          height: window.screen.height / 1.1
         },
         middle: { 
           enabled: true,

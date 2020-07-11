@@ -2,12 +2,13 @@
   --ion-safe-area-top: 20px;
   --ion-safe-area-bottom: 22px;
 }
-
-.ion-chip-group {
-  display: flex;
-  flex-flow: row wrap;
+ion-button{
+  --ion-color-primary: #009E0F;
+  --ion-color-primary-shade: black !important;
+  --ion-color-primary-tint: black !important;
 }
-
-ion-chip {
-  flex: 0 0 auto;
+ion-button.danger{
+  --ion-color-primary: #990000;
+  --ion-color-primary-shade: black !important;
+  --ion-color-primary-tint: black !important;
 }

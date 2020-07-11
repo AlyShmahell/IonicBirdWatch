@@ -1,15 +1,16 @@
 <ion-menu side="end" menuId="menu" contentId="main">
   <ion-header>
-    <ion-toolbar color="primary">
-      <ion-title>Start Menu</ion-title>
+    <ion-toolbar>
+      <ion-title>Options</ion-title>
     </ion-toolbar>
   </ion-header>
   <ion-content>
     <ion-list>
-      <ion-item
-        ><ion-button [routerLink]="['/filters']"
-          ><ion-icon name="options-outline"></ion-icon></ion-button
-      ></ion-item>
+      <ion-item>
+        <ion-button [routerLink]="['/filters']" routerDirection="root" (click)="closeMenu()">
+          <ion-icon name="options-outline"></ion-icon>
+        </ion-button>
+      </ion-item>
     </ion-list>
   </ion-content>
 </ion-menu>

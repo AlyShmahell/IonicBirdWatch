@@ -16,11 +16,13 @@ import { IonicStorageModule } from '@ionic/storage';
 import { SQLite } from '@ionic-native/sqlite/ngx';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClient } from "@angular/common/http";
+import {IonTagsInputModule} from "./ionic-tags-input";
+
 
 @NgModule({
   declarations: [AppComponent],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule, IonicStorageModule.forRoot(), HttpClientModule],
+  imports: [IonTagsInputModule, BrowserModule, IonicModule.forRoot(), AppRoutingModule, IonicStorageModule.forRoot(), HttpClientModule],
   providers: [
     Geolocation,
     File,

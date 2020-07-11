@@ -5,9 +5,11 @@ import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
 import { FiltersPage } from './filters.page';
 import { ComponentsModule } from './components.module';
+import {IonTagsInputModule} from "./ionic-tags-input";
 
 @NgModule({
   imports: [
+    IonTagsInputModule,
     CommonModule,
     FormsModule,
     IonicModule,

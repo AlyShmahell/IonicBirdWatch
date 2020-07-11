@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MenuController } from '@ionic/angular';
 import { Injectable } from '@angular/core';
 
+
 @Component({
   selector: 'app-menu',
   templateUrl: 'amenu.component.html',
@@ -12,12 +13,27 @@ import { Injectable } from '@angular/core';
 @Injectable({
   providedIn: 'root'
 })
+
+
 export class AppMenu {
-
-constructor(private menu: MenuController) { }
-
-openMenu() {
-    this.menu.enable(true, 'menu');
-    this.menu.open('menu');
+  constructor(private menu: MenuController) {
+  }
+  async openMenu() {
+    if (! await this.menu.isEnabled()){
+      this.menu.enable(true, 'menu');
+    }
+    if (! await this.menu.isOpen()){
+      await this.menu.open();
+    }
+  }
+  async closeMenu() {
+    if (await this.menu.isOpen())
+    {
+      await this.menu.close()
+    }
+    if (await this.menu.isEnabled())
+    {
+      await this.menu.enable(false);
+    }
   }
 }

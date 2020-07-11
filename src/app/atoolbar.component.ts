@@ -2,6 +2,7 @@ import { Component, OnInit, Output, EventEmitter  } from '@angular/core';
 import { Injectable } from '@angular/core';
 import { AppMenu } from './amenu.component';
 
+
 @Component({
   selector: 'app-toolbar',
   templateUrl: 'atoolbar.component.html',
@@ -22,6 +23,7 @@ export class AppToolBar implements OnInit {
     this.deteriorated.next('deteriorated');
    }
    async openMenu() {
+     console.log('toolbar opening menu');
     await this.menu.openMenu();
   }
 }

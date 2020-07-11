@@ -45,7 +45,7 @@ export class InfListComponent implements OnInit {
   requestdata() {
     const range = interval(1000);
     const piper = range.pipe(
-      switchMap(() => this.db.dbInstance.executeSql(`SELECT * from map`))
+      switchMap(() => this.db.dbInstance.executeSql(`SELECT * from filters`))
     );
     piper.subscribe(
       (x: any)=> {
@@ -55,7 +55,7 @@ export class InfListComponent implements OnInit {
           console.log([filters, this.filters]);
           this.filters = filters;
           this.http
-            .get<Item[]>(`http://127.0.0.1:5001/guest/wildlife?text=%22awesome%22&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=[%22bird%22]&by=anyone&lon=${filters.c_lon}&lat=${filters.c_lat}&area=15`)
+            .get<Item[]>(`http://127.0.0.1:5001/guest/wildlife?text=%22awesome%22&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=[%22bird%22]&by=anyone&lon=${filters.lon}&lat=${filters.lat}&area=15`)
             .subscribe(data => {
               this.items = _.values(data['data']);
             },

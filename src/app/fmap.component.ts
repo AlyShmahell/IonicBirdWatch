@@ -13,6 +13,8 @@ import Point from 'ol/geom/Point';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
 import { Injectable } from '@angular/core';
 import { SQLiteProvider } from './sqlite.provider';
+import Search from 'ol-ext/control/Search';
+import { easeOut } from 'ol/easing';
 
 
 @Component({
@@ -29,10 +31,9 @@ import { SQLiteProvider } from './sqlite.provider';
 export class fMapComponent implements OnInit {
   @Input() title: string = 'Drawer UI element';
   constructor(private geolocation: Geolocation, private db: SQLiteProvider) { }
-  async update_map_sql(center)
-  {
-    await this.db.dbInstance.executeSql(`UPDATE map SET c_lon=${center[0]}, c_lat=${center[1]} WHERE id=1`);
-    var res2 = await this.db.dbInstance.executeSql(`SELECT * from map`);
+  async update_map_sql(center) {
+    await this.db.dbInstance.executeSql(`UPDATE filters SET lon=${center[0]}, lat=${center[1]} WHERE id=1`);
+    var res2 = await this.db.dbInstance.executeSql(`SELECT * from filters`);
     console.log('res2', res2);
   }
   ngOnInit() {
@@ -72,7 +73,25 @@ export class fMapComponent implements OnInit {
       ],
       view: view
     });
+    document.querySelector('.ol-zoom').innerHTML = '';
+    //document.querySelector('fmap').innerHTML += '<p>A</p>'
+    /*
+    var search = new Search(
+      {	target: document.querySelector('.ol-zoom'),
+        // Title to use in the list
+        getTitle: function (f) { return f.name; }
+      });
+    map.addControl(search);
 
+    // Center when click on the reference index
+    search.on('select', function (e) {
+      map.getView().animate({
+        center: e.search.pos,
+        zoom: 6,
+        easing: easeOut
+      })
+    });
+    */
     var iconFeature = new Feature({
       geometry: geometry
     });
@@ -112,8 +131,8 @@ export class fMapComponent implements OnInit {
     setTimeout(async () => {
       map.updateSize();
       await this.db.seed('assets/sql/seed.sql');
-      await this.db.dbInstance.executeSql(`INSERT INTO map(id, c_lon, c_lat) VALUES (1, ${center[0]}, ${center[1]})`);
-      var res = await this.db.dbInstance.executeSql(`SELECT * from map`);
+      await this.db.dbInstance.executeSql(`INSERT INTO filters(id, lon, lat) VALUES (1, ${center[0]}, ${center[1]})`);
+      var res = await this.db.dbInstance.executeSql(`SELECT * from filters`);
       console.log('res', res);
     }, 1);
   }
