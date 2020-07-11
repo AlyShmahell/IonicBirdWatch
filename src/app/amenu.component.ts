@@ -16,17 +16,8 @@ export class AppMenu {
 
 constructor(private menu: MenuController) { }
 
-  openFirst() {
-    this.menu.enable(true, 'first');
-    this.menu.open('first');
-  }
-
-  openEnd() {
-    this.menu.open('end');
-  }
-
-  openCustom() {
-    this.menu.enable(true, 'custom');
-    this.menu.open('custom');
+openMenu() {
+    this.menu.enable(true, 'menu');
+    this.menu.open('menu');
   }
 }

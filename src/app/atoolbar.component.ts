@@ -22,6 +22,6 @@ export class AppToolBar implements OnInit {
     this.deteriorated.next('deteriorated');
    }
    async openMenu() {
-    await this.menu.openFirst();
+    await this.menu.openMenu();
   }
 }

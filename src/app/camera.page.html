@@ -2,15 +2,8 @@
 
 <ion-grid style="height: 100%;">
   <ion-row class="ion-align-items-center" style="height: 100%;">
-    <ion-col size="3" class="ion-text-center">
-      <ion-button (click)="capture()">
-        <ion-icon name="camera-outline"></ion-icon>
-      </ion-button>
-    </ion-col>
-    <ion-col size="1" class="ion-text-center">
-    </ion-col>
-    <ion-col size="8" class="ion-text-center">
-      <img [src]="photo" />
+    <ion-col size="12" class="ion-text-center">
+      <img [src]="photo" (click)="capture()"/>
     </ion-col>
   </ion-row>
 </ion-grid>

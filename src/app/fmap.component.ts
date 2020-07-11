@@ -29,15 +29,11 @@ import { SQLiteProvider } from './sqlite.provider';
 export class fMapComponent implements OnInit {
   @Input() title: string = 'Drawer UI element';
   constructor(private geolocation: Geolocation, private db: SQLiteProvider) { }
-  async testdb() {
-    console.log("testing SQL 1");
-    let res = await this.db.seed('assets/sql/seed.sql');
-    console.log("testing SQL 2: ", res);
-    await this.db.dbInstance.executeSql(`INSERT INTO user(id, name) VALUES (1, 'Suraj')`);
-    console.log("testing SQL 3");
-    let users = await this.db.dbInstance.executeSql('SELECT * FROM user');
-    console.log("testing SQL 4");
-    console.log(users);
+  async update_map_sql(center)
+  {
+    await this.db.dbInstance.executeSql(`UPDATE map SET c_lon=${center[0]}, c_lat=${center[1]} WHERE id=1`);
+    var res2 = await this.db.dbInstance.executeSql(`SELECT * from map`);
+    console.log('res2', res2);
   }
   ngOnInit() {
 
@@ -109,12 +105,16 @@ export class fMapComponent implements OnInit {
     watch.subscribe((data) => {
       center = [data.coords.longitude, data.coords.latitude]
       console.log("changed coordinate", center);
-      view.setCenter(fromLonLat(center))
-      geometry.setCoordinates(fromLonLat(center))
+      view.setCenter(fromLonLat(center));
+      geometry.setCoordinates(fromLonLat(center));
+      this.update_map_sql(center);
     });
-    setTimeout(() => {
+    setTimeout(async () => {
       map.updateSize();
-      this.testdb();
+      await this.db.seed('assets/sql/seed.sql');
+      await this.db.dbInstance.executeSql(`INSERT INTO map(id, c_lon, c_lat) VALUES (1, ${center[0]}, ${center[1]})`);
+      var res = await this.db.dbInstance.executeSql(`SELECT * from map`);
+      console.log('res', res);
     }, 1);
   }
 }

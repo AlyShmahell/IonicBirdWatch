@@ -1,0 +1,33 @@
+<app-toolbar (deteriorated)="filterSetter($event)"></app-toolbar>
+<ion-item>
+  <div class="ion-chip-group">
+    <ion-input placeholder="Add chip..."></ion-input>
+  </div>
+</ion-item>
+
+<ion-item>
+  <ion-label>By</ion-label>
+  <ion-select (ionChange)="selectChange($event)" placeholder="Author">
+    <ion-select-option value="anyone">Any one</ion-select-option>
+    <ion-select-option value="me">My self</ion-select-option>
+  </ion-select>
+</ion-item>
+<ion-label>Gender</ion-label>
+<ion-content fullscreen>
+  <ion-list>
+    <ion-item>
+      <ion-label>Gender</ion-label>
+      <ion-range
+        id="dual-range"
+        dual-knobs
+        pin
+        min="0"
+        max="100"
+        value="100"
+        color="dark"
+        (ionChange)="rangeChange($event)"
+      >
+      </ion-range>
+    </ion-item>
+  </ion-list>
+</ion-content>
