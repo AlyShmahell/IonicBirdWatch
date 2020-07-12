@@ -1,7 +1,47 @@
 <app-toolbar (deteriorated)="reset($event)"></app-toolbar>
 
-<ion-grid style="height: 100%;">
-  <ion-row class="ion-align-items-center" style="height: 100%;">
+
+<ion-grid no-padding style="width: 84%; margin: 8%;" ion-align-items-center>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+      <ion-label>Type</ion-label>
+    </ion-col>
+    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+      <ion-tags-input
+        [(ngModel)]="type"
+        (onChange)="typeChange($event)"
+        [placeholder]="''"
+        [color]="'#2B78E4'"
+      ></ion-tags-input>
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+      <ion-label>Species</ion-label>
+    </ion-col>
+    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+      <ion-tags-input
+        [(ngModel)]="species"
+        (onChange)="speciesChange($event)"
+        [placeholder]="''"
+        [color]="'#2B78E4'"
+      ></ion-tags-input>
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+      <ion-label>Notes</ion-label>
+    </ion-col>
+    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+      <ion-textarea
+        [(ngModel)]="notes"
+        (onChange)="notesChange($event)"
+        [placeholder]="''"
+        [color]="'#000000'"
+      ></ion-textarea>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-align-items-center" >
     <ion-col size="12" class="ion-text-center">
       <img [src]="photo" (click)="capture()" />
     </ion-col>

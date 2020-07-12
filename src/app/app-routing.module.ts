@@ -2,41 +2,41 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'map', pathMatch: 'full' },
-  { path: 'map', loadChildren: () => import('./map.module').then( m => m.MapPageModule)},
-  { path: 'camera', loadChildren: () => import('./camera.module').then( m => m.CameraPageModule) },
-  { path: 'filters', loadChildren: () => import('./filters.module').then( m => m.FiltersPageModule) },
+  { path: '', redirectTo: 'signup', pathMatch: 'full' },
+  { path: 'map', loadChildren: () => import('./map.module').then(m => m.MapPageModule) },
+  { path: 'camera', loadChildren: () => import('./camera.module').then(m => m.CameraPageModule) },
+  { path: 'filters', loadChildren: () => import('./filters.module').then(m => m.FiltersPageModule) },
   {
     path: 'signin',
-    loadChildren: () => import('./signin/signin.module').then( m => m.SigninPageModule)
+    loadChildren: () => import('./signin/signin.module').then(m => m.SigninPageModule)
   },
   {
     path: 'signup',
-    loadChildren: () => import('./signup/signup.module').then( m => m.SignupPageModule)
+    loadChildren: () => import('./signup/signup.module').then(m => m.SignupPageModule)
   },
   {
     path: 'privacy',
-    loadChildren: () => import('./privacy/privacy.module').then( m => m.PrivacyPageModule)
+    loadChildren: () => import('./privacy/privacy.module').then(m => m.PrivacyPageModule)
   },
   {
     path: 'terms',
-    loadChildren: () => import('./terms/terms.module').then( m => m.TermsPageModule)
+    loadChildren: () => import('./terms/terms.module').then(m => m.TermsPageModule)
   },
   {
     path: 'about',
-    loadChildren: () => import('./about/about.module').then( m => m.AboutPageModule)
+    loadChildren: () => import('./about/about.module').then(m => m.AboutPageModule)
   },
   {
     path: 'licenses',
-    loadChildren: () => import('./licenses/licenses.module').then( m => m.LicensesPageModule)
+    loadChildren: () => import('./licenses/licenses.module').then(m => m.LicensesPageModule)
   },
   {
     path: 'profile',
-    loadChildren: () => import('./profile/profile.module').then( m => m.ProfilePageModule)
+    loadChildren: () => import('./profile/profile.module').then(m => m.ProfilePageModule)
   },
   {
     path: 'manage',
-    loadChildren: () => import('./manage/manage.module').then( m => m.ManagePageModule)
+    loadChildren: () => import('./manage/manage.module').then(m => m.ManagePageModule)
   },
 
 ];
