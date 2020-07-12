@@ -65,6 +65,9 @@
     text-align: center;
     font-size: 12pt;
     --placeholder-font-weight: 100;
+    --icon-color: white;
+    --placeholder-color:white;
+    --placeholder-opacity: 60%;
   }
   
   ion-searchbar.invisible{
@@ -73,7 +76,7 @@
     width: 80%; 
     white-space: pre-wrap;
     --background: transparent;
-    --icon-color: black;
+    --icon-color: #990000;
     opacity: 100%;
   }
   

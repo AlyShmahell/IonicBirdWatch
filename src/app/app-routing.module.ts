@@ -32,11 +32,11 @@ const routes: Routes = [
   },
   {
     path: 'profile',
-    loadChildren: () => import('./profile/profile.module').then(m => m.ProfilePageModule)
+    loadChildren: () => import('./profile.module').then(m => m.ProfilePageModule)
   },
   {
     path: 'manage',
-    loadChildren: () => import('./manage/manage.module').then(m => m.ManagePageModule)
+    loadChildren: () => import('./manage.module').then(m => m.ManagePageModule)
   },
 
 ];
