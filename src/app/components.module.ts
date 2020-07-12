@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClient } from "@angular/common/http";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { SlideDrawerComponent } from './slide-drawer.component';
 import { fMapComponent } from './fmap.component';
 import { InfListComponent } from './inflist.component';
@@ -19,7 +20,8 @@ import { RouterModule } from '@angular/router';
     CommonModule,
     HttpClientModule,
     IonicModule,
-    RouterModule
+    RouterModule,
+    FontAwesomeModule
   ],
   providers: [
     HttpClient
