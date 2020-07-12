@@ -6,10 +6,12 @@ import { RouterModule } from '@angular/router';
 import { CameraPage } from './camera.page';
 import { ComponentsModule } from './components.module';
 import {IonTagsInputModule} from "./ionic-tags-input";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   imports: [
     IonTagsInputModule,
+    FontAwesomeModule,
     CommonModule,
     FormsModule,
     IonicModule,

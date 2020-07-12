@@ -2,17 +2,22 @@
 
 
 <ion-grid no-padding style="width: 84%; margin: 8%;" ion-align-items-center>
+  <ion-row class="ion-align-items-center" style="margin: 10% 0 10% 0;">
+    <ion-col size="12" class="ion-text-center">
+      <ion-label class="subtitle"  color="green">Add New WildLife</ion-label >
+    </ion-col>
+  </ion-row>
   <ion-row no-padding justify-content-start align-items-start>
     <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
       <ion-label>Type</ion-label>
     </ion-col>
     <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
-      <ion-tags-input
-        [(ngModel)]="type"
-        (onChange)="typeChange($event)"
+      <ion-input
+        [(ngModel)]="data.type"
+        (input)="typeChange($event)"
         [placeholder]="''"
         [color]="'#2B78E4'"
-      ></ion-tags-input>
+      ></ion-input>
     </ion-col>
   </ion-row>
   <ion-row no-padding justify-content-start align-items-start>
@@ -20,30 +25,36 @@
       <ion-label>Species</ion-label>
     </ion-col>
     <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
-      <ion-tags-input
-        [(ngModel)]="species"
-        (onChange)="speciesChange($event)"
+      <ion-input
+        [(ngModel)]="data.species"
+        (input)="speciesChange($event)"
         [placeholder]="''"
         [color]="'#2B78E4'"
-      ></ion-tags-input>
+      ></ion-input>
     </ion-col>
   </ion-row>
   <ion-row no-padding justify-content-start align-items-start>
-    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
+    <ion-col ion-item no-padding text-center col-6 align-items-start>
       <ion-label>Notes</ion-label>
     </ion-col>
-    <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
-      <ion-textarea
-        [(ngModel)]="notes"
-        (onChange)="notesChange($event)"
-        [placeholder]="''"
-        [color]="'#000000'"
-      ></ion-textarea>
+    <ion-col ion-item no-padding text-center col-6 align-items-start>
+      <ion-input
+        [(ngModel)]="data.notes"
+        (input)="notesChange($event)"
+      ></ion-input>
     </ion-col>
   </ion-row>
-  <ion-row class="ion-align-items-center" >
+  <ion-row class="ion-align-items-center" style="margin: 10% 0 10% 0;">
     <ion-col size="12" class="ion-text-center">
-      <img [src]="photo" (click)="capture()" />
+      <img [src]="photo" width="50%" (click)="capture()" />
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-center align-items-center >
+    <ion-col ion-item no-padding text-center col-6 align-items-center >
+      <ion-button (click)="reset()" color="red"><fa-icon icon="recycle" class="fa-lg fa-fw"></fa-icon></ion-button>
+    </ion-col>
+    <ion-col ion-item no-padding text-center col-6 align-items-center style="text-align: right;">
+      <ion-button (click)="submit()" color="green"><fa-icon icon="paper-plane" class="fa-lg fa-fw"></fa-icon></ion-button>
     </ion-col>
   </ion-row>
 </ion-grid>

@@ -45,6 +45,7 @@
     "@ionic/storage": "^2.2.0",
     "@taufik-nurrohman/tag-picker": "^3.0.12",
     "@yaireo/tagify": "^3.14.3",
+    "axios": "^0.19.2",
     "com-badrit-base64": "^0.2.0",
     "cordova-browser": "6.0.0",
     "cordova-plugin-advanced-http": "^2.5.1",

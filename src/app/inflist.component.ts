@@ -6,6 +6,8 @@ import { switchMap } from 'rxjs/operators';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { SQLiteProvider } from './sqlite.provider';
+import axios from 'axios';
+import { ToastController } from '@ionic/angular';
 
 
 
@@ -38,7 +40,7 @@ export class InfListComponent implements OnInit {
   items$: Observable<Item[]>;
   filters: any;
   inflistdisabled = false;
-  constructor(private http: HttpClient, private db: SQLiteProvider) { }
+  constructor(private http: HttpClient, private db: SQLiteProvider, public toastController: ToastController) { }
   ngOnInit() {
     this.requestdata();
   }
@@ -48,23 +50,43 @@ export class InfListComponent implements OnInit {
       switchMap(() => this.db.dbInstance.executeSql(`SELECT * from filters`))
     );
     piper.subscribe(
-      (x: any)=> {
+      (x: any) => {
         var filters = x.rows[0];
-        if (!_.isEqual(filters, this.filters))
-        {
+        if (!_.isEqual(filters, this.filters)) {
           console.log([filters, this.filters]);
           this.filters = filters;
-          this.http
-            .get<Item[]>(`http://127.0.0.1:5001/guest/wildlife?text=%22awesome%22&maxd=2018-06-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=[%22bird%22]&by=anyone&lon=${filters.lon}&lat=${filters.lat}&area=15`)
-            .subscribe(data => {
-              this.items = _.values(data['data']);
-            },
-              err => {
-                console.log(err);
-              });
+          axios.get(
+            `http://127.0.0.1:5001/auth/wildlife?text=%22%22&maxd=2020-12-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=[%22%22]&by=anyone&lon=${filters.lon}&lat=${filters.lat}&area=150`,
+            {
+              headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Authorization": `Bearer ${document.cookie}`,
+                "X-Requested-With": "XMLHttpRequest",
+                "Content-Type": "application/json"
+              },
+              withCredentials: true
+            }
+          ).then(
+            (resp) => {
+              console.log("resp", resp)
+              this.items = _.values(resp.data.data);
+            }
+          ).catch(
+            async (err) => {
+              await this.toast("not logged in", "red");
+            }
+          )
         }
       }
     );
+  }
+  async toast(message, color) {
+    const toast = await this.toastController.create({
+      message: message,
+      color: color,
+      duration: 2000
+    });
+    toast.present();
   }
   inflistload(event) {
     this.requestdata();
