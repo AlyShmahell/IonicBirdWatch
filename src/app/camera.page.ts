@@ -71,12 +71,25 @@ export class CameraPage {
   }
 
   submit() {
+    var empty = [];
+    for (var key in this.data){
+      if(this.data[key] === "")
+      {
+        if ("photo type species notes".indexOf(key) > -1)
+        {
+          empty.push(key);
+        }
+      }
+    }
+    if (empty.length > 0)
+    {
+      this.toast("empty fields: "+empty.join(", "), "red");
+      return;
+    }
     var date = new Date().toISOString();
-    console.log(this.center);
     this.data.date = date;
     this.data.lon = this.center[0];
     this.data.lat = this.center[1];
-    console.log(this.data);
     var res: any;
     axios.post(
       `http://127.0.0.1:5001/auth/wildlife`,
@@ -103,7 +116,7 @@ export class CameraPage {
       }
     ).catch(
       async (err) => {
-        await this.toast("credentials already exist", "red");
+        await this.toast("photo already exists", "red");
       }
     )
   }

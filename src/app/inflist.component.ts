@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { SQLiteProvider } from './sqlite.provider';
 import axios from 'axios';
 import { ToastController } from '@ionic/angular';
+import { EventEmitterService } from './event.service';
 
 
 
@@ -40,8 +41,9 @@ export class InfListComponent implements OnInit {
   items$: Observable<Item[]>;
   filters: any;
   inflistdisabled = false;
-  constructor(private http: HttpClient, private db: SQLiteProvider, public toastController: ToastController) { }
+  constructor(private http: HttpClient, private db: SQLiteProvider, public toastController: ToastController, private  ees: EventEmitterService) { }
   ngOnInit() {
+    this.ees.emit('inflist');
     this.requestdata();
   }
   requestdata() {
@@ -67,9 +69,16 @@ export class InfListComponent implements OnInit {
               withCredentials: true
             }
           ).then(
-            (resp) => {
-              console.log("resp", resp)
+            async (resp) => {
               this.items = _.values(resp.data.data);
+              for (var i = 0; i < this.items.length; i++) {
+                try {
+                  await this.db.dbInstance.executeSql(`INSERT INTO wildlife(id, userid, typ, species, notes, lon, lat, datee, photo) VALUES (${this.items[i].id}, ${this.items[i].userid}, "${this.items[i].type}", "${this.items[i].species}", "${this.items[i].notes}", ${this.items[i].lon}, ${this.items[i].lat}, "${this.items[i].date}", "${this.items[i].photo}")`);
+                } catch (e) {
+                  console.log('sql error', e)
+                }
+              }
+              this.ees.emit('inflist');
             }
           ).catch(
             async (err) => {

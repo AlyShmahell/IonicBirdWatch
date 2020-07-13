@@ -15,6 +15,10 @@ import { Injectable } from '@angular/core';
 import { SQLiteProvider } from './sqlite.provider';
 import Search from 'ol-ext/control/Search';
 import { easeOut } from 'ol/easing';
+import { Observable } from "rxjs-compat";
+import { interval } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { EventEmitterService } from './event.service';
 
 
 @Component({
@@ -30,7 +34,7 @@ import { easeOut } from 'ol/easing';
 
 export class fMapComponent implements OnInit {
   @Input() title: string = 'Drawer UI element';
-  constructor(private geolocation: Geolocation, private db: SQLiteProvider) { }
+  constructor(private geolocation: Geolocation, private db: SQLiteProvider, private  ees: EventEmitterService) { }
   async update_map_sql(center) {
     await this.db.dbInstance.executeSql(`UPDATE filters SET lon=${center[0]}, lat=${center[1]} WHERE id=1`);
     var res2 = await this.db.dbInstance.executeSql(`SELECT * from filters`);
@@ -74,24 +78,6 @@ export class fMapComponent implements OnInit {
       view: view
     });
     document.querySelector('.ol-zoom').innerHTML = '';
-    //document.querySelector('fmap').innerHTML += '<p>A</p>'
-    /*
-    var search = new Search(
-      {	target: document.querySelector('.ol-zoom'),
-        // Title to use in the list
-        getTitle: function (f) { return f.name; }
-      });
-    map.addControl(search);
-
-    // Center when click on the reference index
-    search.on('select', function (e) {
-      map.getView().animate({
-        center: e.search.pos,
-        zoom: 6,
-        easing: easeOut
-      })
-    });
-    */
     var iconFeature = new Feature({
       geometry: geometry
     });
@@ -132,8 +118,37 @@ export class fMapComponent implements OnInit {
       map.updateSize();
       await this.db.seed('assets/sql/seed.sql');
       await this.db.dbInstance.executeSql(`INSERT INTO filters(id, lon, lat) VALUES (1, ${center[0]}, ${center[1]})`);
-      var res = await this.db.dbInstance.executeSql(`SELECT * from filters`);
-      console.log('res', res);
+      
     }, 1);
+    if (this.ees.subscribe==undefined) {    
+      this.ees.subscribe = this.ees.
+      invoke.subscribe((name:string) => {    
+        this.populate(map);    
+      });    
+    }
+    
+  }
+  async populate(map: Map){
+        var x = await this.db.dbInstance.executeSql(`SELECT * from wildlife`);
+        console.log(x);
+        for(var i = 0; i < x.rows.length; i++){
+          var y = x.rows[i];
+          var geometry = new Point(fromLonLat([y.lon, y.lat]));
+          var iconFeature = new Feature({
+            geometry: geometry
+          });
+          var ivaryle = new Style({
+            image: new Icon({
+              src: 'assets/img/location-outline.png'
+            })
+          });
+          iconFeature.setStyle(ivaryle);
+          var layer = new LayerVector({
+            source: new SourceVector({
+              features: [iconFeature]
+            })
+          });
+          map.addLayer(layer);
+        }
   }
 }

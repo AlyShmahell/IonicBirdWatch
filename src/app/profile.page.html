@@ -19,13 +19,13 @@
   <ion-row no-padding justify-content-start align-items-start>
     <ion-col ion-item no-lines no-padding text-center col-12 align-items-start>
       <ion-searchbar
-        [(ngModel)]="data.username"
-        (ionBlur)="commitUsername()"
-        name="username"
+        [(ngModel)]="data.fullname"
+        (ionBlur)="commitfullname()"
+        name="fullname"
         showCancelButton="never"
         type="text"
         searchIcon="person-circle-outline"
-        placeholder="username"
+        placeholder="fullname"
       ></ion-searchbar>
     </ion-col>
   </ion-row>
@@ -70,6 +70,7 @@
         <ion-button
           expand="block"
           [routerLink]="['/manage']"
+          (click) = "reset($event)"
           class="ion-no-margin"
           color="grey"
           style="width:100%; height: 100%;"

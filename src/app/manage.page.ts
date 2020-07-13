@@ -16,13 +16,51 @@ export class ManagePage implements OnInit {
   data: any;
 
   constructor(private sanitizer: DomSanitizer, private router: Router, public toastController: ToastController) {
-    this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/person.png');
-    this.data = {
-      "password": "",
-      "photo" : ""
-    };
+    this.reset(undefined);
   }
   ngOnInit() {
+    this.reset(undefined);
+  }
+  reset(event) {
+    console.log(event);
+    this.data = {
+      "fullname": "",
+      "website": "",
+      "bio": ""
+    };
+    axios.get(
+      `http://127.0.0.1:5001/auth/profile`,
+      {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Authorization": `Bearer ${document.cookie}`,
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json"
+        },
+        withCredentials: true
+      }
+    ).then(
+      async (resp) => {
+        if (resp.status === 200) {
+          this.data = {
+            "photo": resp.data.data.photo,
+            "password": ""
+          }
+          if (this.data.photo != null && this.data.photo != "") {
+            console.log('op1');
+            this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(this.data.photo);
+          }
+          else {
+            console.log('op2');
+            this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/person.png');
+          }
+        }
+      }
+    ).catch(
+      async (err) => {
+        await this.toast("something went wrong while loading profile data", "red");
+      }
+    )
   }
   async capture() {
     try {
@@ -36,30 +74,24 @@ export class ManagePage implements OnInit {
       console.log(image.dataUrl);
       this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(image && (image.dataUrl));
       this.data.photo = image && (image.dataUrl);
+      this.commitPhoto(undefined);
     }
     catch (e) {
       console.log('cancelled')
     }
   }
-  uncapture(){
+  uncapture() {
     this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/person.png');
     this.data.photo = "";
-  }
-  reset(event) {
-    console.log(event);
-    this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/person.png');
-    this.data = {
-      "password": "",
-      "photo" : ""
-    };
+    this.commitPhoto(undefined);
   }
 
-  submit() {
-    console.log(this.data);
+  submit(category) {
+    var data = { 'value': this.data[category] }
     var res: any;
-    axios.post(
-      `http://127.0.0.1:5001/auth/wildlife`,
-      this.data,
+    axios.put(
+      `http://127.0.0.1:5001/auth/profile/${category}`,
+      data,
       {
         headers: {
           "Access-Control-Allow-Origin": "*",
@@ -75,14 +107,13 @@ export class ManagePage implements OnInit {
         console.log(res);
         if (res.data.message != undefined) {
           if (res.data.message === "success") {
-            await this.toast(res.data.message, "green");
-            this.router.navigate(['/map']);
+            await this.toast(`${category} was updated successfully`, "green");
           }
         }
       }
     ).catch(
       async (err) => {
-        await this.toast("credentials already exist", "red");
+        await this.toast(`could not update ${category}`, "red");
       }
     )
   }
@@ -97,7 +128,11 @@ export class ManagePage implements OnInit {
   }
 
   commitPassword(val) {
-    console.log(this.data.password)
+    if (this.data.password != "")
+      this.submit('password');
+  }
+  commitPhoto(val) {
+    this.submit('photo');
   }
 
 }
