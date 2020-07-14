@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { SQLiteProvider } from './sqlite.provider';
+import { EventEmitterService } from './event.service';
 
 function pop(array: any) {
   const index = array.indexOf(5);
@@ -16,22 +18,34 @@ function pop(array: any) {
 
 
 export class FiltersPage {
-  tags = [];
-  tagChange(val){
-    console.log(this.tags)
-  }
-  rangeChange(event) {
-    console.log(event.detail.value.lower, event.detail.value.upper);
-  }
-  selectChange(event) {
-    console.log(event.detail.value);
-  }
-  reset(event) {
-    console.log(event);
-    // commit to local db
-  }
-  ngOnInit() {
+  filters: any;
+  constructor(private db: SQLiteProvider, private ees: EventEmitterService){}
 
+  reset(event) {
+    this.filters = {
+      'daterange': {'lower': 0, 'upper': 100},
+      'by': "anyone",
+      'types': []
+    };
+  }
+  async submit(event){
+    var maxd = new Date();
+    maxd.setMonth(maxd.getMonth() - this.filters.daterange.lower);
+    var smaxd = maxd.toISOString();
+    var mind = new Date();
+    mind.setMonth(mind.getMonth() -  this.filters.daterange.upper);
+    var smind = maxd.toISOString();
+    await this.db.dbInstance.executeSql(`UPDATE filters SET mind="${smind}", maxd="${smaxd}", bywho="${this.filters.by}", typ="${this.filters.types}" WHERE id=1`);
+  }
+
+  ngOnInit() {
+    this.reset(null);
+    if (this.ees.subscribe == undefined) {
+      this.ees.subscribe = this.ees.
+        invoke.subscribe(async (name: string) => {
+          await this.submit(undefined);
+        });
+    }
   }
 
 }

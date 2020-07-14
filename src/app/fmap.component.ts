@@ -34,10 +34,12 @@ import { EventEmitterService } from './event.service';
 
 export class fMapComponent implements OnInit {
   @Input() title: string = 'Drawer UI element';
-  constructor(private geolocation: Geolocation, private db: SQLiteProvider, private  ees: EventEmitterService) { }
-  async update_map_sql(center) {
+  constructor(private geolocation: Geolocation, private db: SQLiteProvider, private ees: EventEmitterService) { }
+  async update_filters_sql(center) {
+    this.ees.emit('fmap');
     await this.db.dbInstance.executeSql(`UPDATE filters SET lon=${center[0]}, lat=${center[1]} WHERE id=1`);
     var res2 = await this.db.dbInstance.executeSql(`SELECT * from filters`);
+    
     console.log('res2', res2);
   }
   ngOnInit() {
@@ -83,7 +85,7 @@ export class fMapComponent implements OnInit {
     });
     var ivaryle = new Style({
       image: new Icon({
-        src: 'assets/img/location-outline.png'
+        src: 'assets/img/crosshairs.png'
       })
     });
     iconFeature.setStyle(ivaryle);
@@ -93,12 +95,37 @@ export class fMapComponent implements OnInit {
       })
     });
     map.addLayer(layer);
-    map.on('click', function (evt: any) {
+    map.on('click', async (evt: any) => {
       var coordinate = evt.coordinate;
-      var hdms = toStringHDMS(toLonLat(coordinate));
-      content.innerHTML = '<p>clicked coordinates are :</p><code>' + hdms + '</code>';
-      overlay.setPosition(coordinate);
-      console.log(coordinate);
+      var lonlat = toLonLat(coordinate);
+      //lonlat[0] = Math.round(lonlat[0]);
+      //lonlat[1] = Math.round(lonlat[1]);
+      console.log('lonlat', lonlat)
+      var x = await this.db.dbInstance.executeSql(`SELECT * from wildlife WHERE ABS(lon-${lonlat[0]}) < 0.001 AND ABS(lat-${lonlat[1]}) < 0.001`);
+      for (var i = 0; i < x.rows.length; i++) {
+        var item = x.rows[i];
+        console.log('found', item)
+        content.innerHTML = `<ion-item>
+                                  <ion-thumbnail slot="start">
+                                    <img src="${item.photo}"/>
+                                  </ion-thumbnail>
+                                  <ion-label>
+                                    <h2>${item.typ}</h2>
+                                  </ion-label>
+                                  <ion-label>
+                                    <h4>${ item.species }</h4>
+                                  </ion-label>
+                                  <ion-label>
+                                    <h4>${ item.dist }</h4>
+                                  </ion-label>
+                                </ion-item>
+                                <ion-card-content>
+                                  ${ item.notes }
+                                </ion-card-content>
+                              </ion-card>
+                            </ion-item>`;
+        overlay.setPosition(coordinate);
+      }
       return true;
     });
     closer.onclick = function () {
@@ -112,43 +139,43 @@ export class fMapComponent implements OnInit {
       console.log("changed coordinate", center);
       view.setCenter(fromLonLat(center));
       geometry.setCoordinates(fromLonLat(center));
-      this.update_map_sql(center);
+      this.update_filters_sql(center);
     });
     setTimeout(async () => {
       map.updateSize();
       await this.db.seed('assets/sql/seed.sql');
       await this.db.dbInstance.executeSql(`INSERT INTO filters(id, lon, lat) VALUES (1, ${center[0]}, ${center[1]})`);
-      
+      this.ees.emit('fmap');
     }, 1);
-    if (this.ees.subscribe==undefined) {    
+    if (this.ees.subscribe == undefined) {
       this.ees.subscribe = this.ees.
-      invoke.subscribe((name:string) => {    
-        this.populate(map);    
-      });    
+        invoke.subscribe((name: string) => {
+          this.populate(map);
+        });
     }
-    
+
   }
-  async populate(map: Map){
-        var x = await this.db.dbInstance.executeSql(`SELECT * from wildlife`);
-        console.log(x);
-        for(var i = 0; i < x.rows.length; i++){
-          var y = x.rows[i];
-          var geometry = new Point(fromLonLat([y.lon, y.lat]));
-          var iconFeature = new Feature({
-            geometry: geometry
-          });
-          var ivaryle = new Style({
-            image: new Icon({
-              src: 'assets/img/location-outline.png'
-            })
-          });
-          iconFeature.setStyle(ivaryle);
-          var layer = new LayerVector({
-            source: new SourceVector({
-              features: [iconFeature]
-            })
-          });
-          map.addLayer(layer);
-        }
+  async populate(map: Map) {
+    var x = await this.db.dbInstance.executeSql(`SELECT * from wildlife`);
+    console.log(x);
+    for (var i = 0; i < x.rows.length; i++) {
+      var y = x.rows[i];
+      var geometry = new Point(fromLonLat([y.lon, y.lat]));
+      var iconFeature = new Feature({
+        geometry: geometry
+      });
+      var ivaryle = new Style({
+        image: new Icon({
+          src: 'assets/img/marker.png'
+        })
+      });
+      iconFeature.setStyle(ivaryle);
+      var layer = new LayerVector({
+        source: new SourceVector({
+          features: [iconFeature]
+        })
+      });
+      map.addLayer(layer);
+    }
   }
 }

@@ -15,15 +15,33 @@ import { EventEmitterService } from './event.service';
 interface Item {
   id: BigInteger;
   userid: BigInteger;
+  type: string;
   species: string;
+  notes: string;
+  lon: BigInteger;
   lat: BigInteger;
   date: Date;
-  notes: string;
-  type: BigInteger;
-  lon: BigInteger;
   photo: string;
 }
 
+
+function calc_distance(p1_lon, p1_lat, p2_lon, p2_lat) {
+  var R = 6378137;
+  var lat1 = p1_lat * Math.PI / 180;
+  var lon1 = p1_lon * Math.PI / 180;
+  var lat2 = p2_lat * Math.PI / 180;
+  var lon2 = p2_lon * Math.PI / 180;
+  var dlon = lon2 - lon1;
+  var dlat = lat2 - lat1;
+  var a = Math.pow(Math.sin(dlat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon / 2), 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var dist = Math.round(R * c);
+  if (dist > 1000) {
+    return `${Math.round(dist / 1000)}km`;
+  } else {
+    return `${dist}m`;
+  }
+}
 
 
 @Component({
@@ -41,7 +59,7 @@ export class InfListComponent implements OnInit {
   items$: Observable<Item[]>;
   filters: any;
   inflistdisabled = false;
-  constructor(private http: HttpClient, private db: SQLiteProvider, public toastController: ToastController, private  ees: EventEmitterService) { }
+  constructor(private http: HttpClient, private db: SQLiteProvider, public toastController: ToastController, private ees: EventEmitterService) { }
   ngOnInit() {
     this.ees.emit('inflist');
     this.requestdata();
@@ -72,8 +90,14 @@ export class InfListComponent implements OnInit {
             async (resp) => {
               this.items = _.values(resp.data.data);
               for (var i = 0; i < this.items.length; i++) {
+                console.log('before calc dist')
+                this.items[i].dist = calc_distance(this.items[i].lon, this.items[i].lat, filters.lon, filters.lat);
+                console.log('after calc dist', this.items[i].dist)
+              }
+              for (var i = 0; i < this.items.length; i++) {
                 try {
-                  await this.db.dbInstance.executeSql(`INSERT INTO wildlife(id, userid, typ, species, notes, lon, lat, datee, photo) VALUES (${this.items[i].id}, ${this.items[i].userid}, "${this.items[i].type}", "${this.items[i].species}", "${this.items[i].notes}", ${this.items[i].lon}, ${this.items[i].lat}, "${this.items[i].date}", "${this.items[i].photo}")`);
+                  await this.db.dbInstance.executeSql(`INSERT INTO wildlife(id, userid, typ, species, notes, lon, lat, dist, datee, photo) VALUES (${this.items[i].id}, ${this.items[i].userid}, "${this.items[i].type}", "${this.items[i].species}", "${this.items[i].notes}", ${this.items[i].lon}, ${this.items[i].lat}, "${this.items[i].dist}", "${this.items[i].date}", "${this.items[i].photo}")`);
+                  
                 } catch (e) {
                   console.log('sql error', e)
                 }
