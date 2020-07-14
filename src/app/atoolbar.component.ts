@@ -23,7 +23,6 @@ export class AppToolBar implements OnInit {
     this.deteriorated.next('deteriorated');
    }
    async openMenu() {
-     console.log('toolbar opening menu');
     await this.menu.openMenu();
   }
 }

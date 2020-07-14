@@ -71,12 +71,11 @@ export class InfListComponent implements OnInit {
     );
     piper.subscribe(
       (x: any) => {
-        var filters = x.rows[0];
+        var filters = x.rows[0]; 
         if (!_.isEqual(filters, this.filters)) {
-          console.log([filters, this.filters]);
           this.filters = filters;
           axios.get(
-            `http://127.0.0.1:5001/auth/wildlife?text=%22%22&maxd=2020-12-29T08:15:27.243860Z&mind=2018-06-29T08:15:27.243860Z&type=[%22%22]&by=anyone&lon=${filters.lon}&lat=${filters.lat}&area=150`,
+            `http://127.0.0.1:5001/auth/wildlife?text="${filters.textt}"&maxd=${filters.maxd}&mind=${filters.mind}&type=${filters.typ}&by=${filters.bywho}&lon=${filters.lon}&lat=${filters.lat}&area=${filters.area}`,
             {
               headers: {
                 "Access-Control-Allow-Origin": "*",
@@ -90,14 +89,11 @@ export class InfListComponent implements OnInit {
             async (resp) => {
               this.items = _.values(resp.data.data);
               for (var i = 0; i < this.items.length; i++) {
-                console.log('before calc dist')
                 this.items[i].dist = calc_distance(this.items[i].lon, this.items[i].lat, filters.lon, filters.lat);
-                console.log('after calc dist', this.items[i].dist)
               }
               for (var i = 0; i < this.items.length; i++) {
                 try {
                   await this.db.dbInstance.executeSql(`INSERT INTO wildlife(id, userid, typ, species, notes, lon, lat, dist, datee, photo) VALUES (${this.items[i].id}, ${this.items[i].userid}, "${this.items[i].type}", "${this.items[i].species}", "${this.items[i].notes}", ${this.items[i].lon}, ${this.items[i].lat}, "${this.items[i].dist}", "${this.items[i].date}", "${this.items[i].photo}")`);
-                  
                 } catch (e) {
                   console.log('sql error', e)
                 }

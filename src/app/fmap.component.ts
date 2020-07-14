@@ -6,18 +6,13 @@ import TileLayer from 'ol/layer/Tile';
 import { Vector as LayerVector } from 'ol/layer';
 import { Vector as SourceVector } from 'ol/source';
 import OSM from 'ol/source/OSM';
-import { fromLonLat, toLonLat } from 'ol/proj';
+import { fromLonLat, toLonLat, transformExtent, transform } from 'ol/proj';
 import { Style, Icon } from 'ol/style';
-import { toStringHDMS } from 'ol/coordinate';
 import Point from 'ol/geom/Point';
+import { getDistance } from 'ol/sphere';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
 import { Injectable } from '@angular/core';
 import { SQLiteProvider } from './sqlite.provider';
-import Search from 'ol-ext/control/Search';
-import { easeOut } from 'ol/easing';
-import { Observable } from "rxjs-compat";
-import { interval } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
 import { EventEmitterService } from './event.service';
 
 
@@ -34,20 +29,49 @@ import { EventEmitterService } from './event.service';
 
 export class fMapComponent implements OnInit {
   @Input() title: string = 'Drawer UI element';
-  constructor(private geolocation: Geolocation, private db: SQLiteProvider, private ees: EventEmitterService) { }
+  map: Map;
+  text: String = "";
+  constructor(private geolocation: Geolocation, private db: SQLiteProvider, private ees: EventEmitterService) {
+    (async () => {
+      await this.db.seed('assets/sql/seed.sql');
+    })();
+    if (this.ees.subscribe == undefined) {
+      this.ees.subscribe = this.ees.
+        invoke.subscribe(async (name: string) => {
+          await this.populate();
+        });
+    }
+    (async () => {
+      var query = `SELECT * from filters where id=1`;
+      var res = await this.db.dbInstance.executeSql(query);
+      if (typeof res.rows[0].textt === 'string' || res.rows[0].textt instanceof String){
+        this.text = res.rows[0].textt;
+      }
+    })();
+
+  }
   async update_filters_sql(center) {
-    this.ees.emit('fmap');
-    await this.db.dbInstance.executeSql(`UPDATE filters SET lon=${center[0]}, lat=${center[1]} WHERE id=1`);
-    var res2 = await this.db.dbInstance.executeSql(`SELECT * from filters`);
-    
-    console.log('res2', res2);
+    var query = `UPDATE filters SET lon=${center[0]}, lat=${center[1]} WHERE id=1`;
+    await this.db.dbInstance.executeSql(query);
+
+  }
+  calc_radius() {
+    var size = this.map.getSize();
+    var center = this.map.getView().getCenter();
+    var sourceProj = this.map.getView().getProjection();
+    var extent = this.map.getView().calculateExtent(size);
+    extent = transformExtent(extent, sourceProj, 'EPSG:4326');
+    var posSW = [extent[0], extent[1]];
+    var posNE = [extent[2], extent[3]];
+    center = transform(center, sourceProj, 'EPSG:4326');
+    var centerToSW = getDistance(center, posSW, 6378137);
+    var centerToNE = getDistance(center, posNE, 6378137);
+    return centerToNE;
   }
   ngOnInit() {
-
     var center = [0, 0];
     this.geolocation.getCurrentPosition().then((resp) => {
-      center = [resp.coords.longitude, resp.coords.latitude]
-      console.log("set coordinate", center);
+      center = [resp.coords.longitude, resp.coords.latitude];
     }).catch((error) => {
       console.log('Error getting location', error);
     });
@@ -66,7 +90,7 @@ export class fMapComponent implements OnInit {
         duration: 250000
       }
     });
-    var map = new Map({
+    this.map = new Map({
       interactions: defaultInteractions().extend([
         new DragRotateAndZoom()
       ]),
@@ -94,17 +118,13 @@ export class fMapComponent implements OnInit {
         features: [iconFeature]
       })
     });
-    map.addLayer(layer);
-    map.on('click', async (evt: any) => {
+    this.map.addLayer(layer);
+    this.map.on('click', async (evt: any) => {
       var coordinate = evt.coordinate;
       var lonlat = toLonLat(coordinate);
-      //lonlat[0] = Math.round(lonlat[0]);
-      //lonlat[1] = Math.round(lonlat[1]);
-      console.log('lonlat', lonlat)
       var x = await this.db.dbInstance.executeSql(`SELECT * from wildlife WHERE ABS(lon-${lonlat[0]}) < 0.001 AND ABS(lat-${lonlat[1]}) < 0.001`);
       for (var i = 0; i < x.rows.length; i++) {
         var item = x.rows[i];
-        console.log('found', item)
         content.innerHTML = `<ion-item>
                                   <ion-thumbnail slot="start">
                                     <img src="${item.photo}"/>
@@ -113,14 +133,14 @@ export class fMapComponent implements OnInit {
                                     <h2>${item.typ}</h2>
                                   </ion-label>
                                   <ion-label>
-                                    <h4>${ item.species }</h4>
+                                    <h4>${ item.species}</h4>
                                   </ion-label>
                                   <ion-label>
-                                    <h4>${ item.dist }</h4>
+                                    <h4>${ item.dist}</h4>
                                   </ion-label>
                                 </ion-item>
                                 <ion-card-content>
-                                  ${ item.notes }
+                                  ${ item.notes}
                                 </ion-card-content>
                               </ion-card>
                             </ion-item>`;
@@ -133,31 +153,34 @@ export class fMapComponent implements OnInit {
       closer.blur();
       return false;
     };
+    setTimeout(async () => {
+      this.map.updateSize();
+      var maxd = new Date();
+      maxd.setMonth(maxd.getMonth() - 0);
+      var smaxd = maxd.toISOString();
+      var mind = new Date();
+      mind.setMonth(mind.getMonth() - 100);
+      var smind = mind.toISOString();
+      var textt = "";
+      var typ = "[\'\']";
+      var bywho = "anyone";
+      var area = this.calc_radius();
+      var query = `INSERT INTO filters(id, textt, maxd, mind, typ, bywho, lon, lat, area) VALUES (1, "${textt}", "${smaxd}", "${smind}", "${typ}", "${bywho}", ${center[0]}, ${center[1]}, ${area})`;
+      var res = await this.db.dbInstance.executeSql(query);
+
+    }, 10);
+
     let watch = this.geolocation.watchPosition();
     watch.subscribe((data) => {
-      center = [data.coords.longitude, data.coords.latitude]
-      console.log("changed coordinate", center);
+      center = [data.coords.longitude, data.coords.latitude];
       view.setCenter(fromLonLat(center));
       geometry.setCoordinates(fromLonLat(center));
       this.update_filters_sql(center);
     });
-    setTimeout(async () => {
-      map.updateSize();
-      await this.db.seed('assets/sql/seed.sql');
-      await this.db.dbInstance.executeSql(`INSERT INTO filters(id, lon, lat) VALUES (1, ${center[0]}, ${center[1]})`);
-      this.ees.emit('fmap');
-    }, 1);
-    if (this.ees.subscribe == undefined) {
-      this.ees.subscribe = this.ees.
-        invoke.subscribe((name: string) => {
-          this.populate(map);
-        });
-    }
-
   }
-  async populate(map: Map) {
-    var x = await this.db.dbInstance.executeSql(`SELECT * from wildlife`);
-    console.log(x);
+  async populate() {
+    var query = `SELECT * from wildlife`;
+    var x = await this.db.dbInstance.executeSql(query);
     for (var i = 0; i < x.rows.length; i++) {
       var y = x.rows[i];
       var geometry = new Point(fromLonLat([y.lon, y.lat]));
@@ -175,7 +198,21 @@ export class fMapComponent implements OnInit {
           features: [iconFeature]
         })
       });
-      map.addLayer(layer);
+      this.map.addLayer(layer);
     }
+  }
+
+  async textInput(event) {
+    event.preventDefault();
+    this.text = event.target.value;
+    var query = `UPDATE filters SET textt="${this.text}" WHERE id=1`;
+    await this.db.dbInstance.executeSql(query);
+  }
+
+  async textClear(event) {
+    event.preventDefault();
+    this.text = "";
+    var query = `UPDATE filters SET textt="${this.text}" WHERE id=1`;
+    await this.db.dbInstance.executeSql(query);
   }
 }

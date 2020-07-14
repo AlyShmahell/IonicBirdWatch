@@ -11,12 +11,14 @@ import { Safe } from './safe.component';
 import {AppToolBar} from './atoolbar.component';
 import {AppMenu} from './amenu.component';
 import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 
 
 @NgModule({
   declarations: [SlideDrawerComponent, fMapComponent, InfListComponent, Safe, AppToolBar, AppMenu],
   imports: [
+    FormsModule,
     CommonModule,
     HttpClientModule,
     IonicModule,

@@ -34,8 +34,7 @@ export class CameraPage {
   ngOnInit() {
     let watch = this.geolocation.watchPosition();
     watch.subscribe((data) => {
-      this.center = [data.coords.longitude, data.coords.latitude]
-      console.log("changed coordinate", this.center);
+      this.center = [data.coords.longitude, data.coords.latitude];
     });
   }
   async capture() {
@@ -47,7 +46,6 @@ export class CameraPage {
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera
       });
-      console.log(image.dataUrl);
       this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(image && (image.dataUrl));
       this.data.photo = image && (image.dataUrl);
     }
@@ -56,7 +54,6 @@ export class CameraPage {
     }
   }
   reset(event) {
-    console.log(event);
     this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/icon.png');
     this.data = {
       "photo": "",
@@ -106,7 +103,6 @@ export class CameraPage {
     ).then(
       async (resp) => {
         res = resp;
-        console.log(res);
         if (res.data.message != undefined) {
           if (res.data.message === "success") {
             await this.toast(res.data.message, "green");
@@ -128,17 +124,5 @@ export class CameraPage {
       duration: 2000
     });
     toast.present();
-  }
-
-  typeChange(val) {
-    console.log(this.data.type)
-  }
-
-  speciesChange(val) {
-    console.log(this.data.species)
-  }
-
-  notesChange(val) {
-    console.log(this.data.notes)
   }
 }

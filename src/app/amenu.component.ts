@@ -56,7 +56,6 @@ export class AppMenu {
     ).then(
       async (resp)=>{
         auth = resp;
-        console.log(auth);
         if (auth.data.message != undefined) {
           if (auth.data.message === "success"){
             await this.toast(auth.data.message, "green");

@@ -1,7 +1,15 @@
-
 <ion-content>
-  <ion-fab vertical="top" horizontal="start" slot="fixed" style="width:100%;">
-    <ion-searchbar showCancelButton="never" style="width:95%;" color="grey"></ion-searchbar>
+  <ion-fab vertical="top" horizontal="start" slot="fixed" style="width: 100%;">
+    <ion-searchbar
+      showCancelButton="never"
+      style="width: 95%;"
+      color="grey"
+      [(ngModel)]="text"
+      (ionInput)="textInput($event)"
+      (ionClear)="textClear($event)"
+      (ionCancel)="textClear($event)"
+      value="text"
+    ></ion-searchbar>
   </ion-fab>
   <div id="fmap" class="fmap"></div>
 </ion-content>

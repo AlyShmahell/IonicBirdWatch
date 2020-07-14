@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { FiltersPage } from './filters.page';
 import { ComponentsModule } from './components.module';
 import {IonTagsInputModule} from "./ionic-tags-input";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   imports: [
@@ -14,6 +15,7 @@ import {IonTagsInputModule} from "./ionic-tags-input";
     FormsModule,
     IonicModule,
     ComponentsModule,
+    FontAwesomeModule,
     RouterModule.forChild([
       {
         path: '',

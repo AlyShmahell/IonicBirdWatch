@@ -18,9 +18,6 @@ export class SigninPage implements OnInit {
   ngOnInit() {
   }
   processForm(event) {
-    console.log(event);
-    console.log(this.signin);
-    console.log(document.cookie);
     axios.post(
       `http://127.0.0.1:5001/auth`,
       this.signin,
@@ -36,7 +33,6 @@ export class SigninPage implements OnInit {
     ).then(
       async (resp)=>{
         this.auth = resp;
-        console.log(this.auth);
         if (this.auth.data.message != undefined) {
           if (this.auth.data.message === "success"){
             await this.toast(this.auth.data.message, "green");

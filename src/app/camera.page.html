@@ -14,7 +14,6 @@
     <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
       <ion-input
         [(ngModel)]="data.type"
-        (input)="typeChange($event)"
         [placeholder]="''"
         [color]="'#2B78E4'"
       ></ion-input>
@@ -27,7 +26,6 @@
     <ion-col ion-item no-lines no-padding text-center col-6 align-items-start>
       <ion-input
         [(ngModel)]="data.species"
-        (input)="speciesChange($event)"
         [placeholder]="''"
         [color]="'#2B78E4'"
       ></ion-input>
@@ -40,7 +38,6 @@
     <ion-col ion-item no-padding text-center col-6 align-items-start>
       <ion-input
         [(ngModel)]="data.notes"
-        (input)="notesChange($event)"
       ></ion-input>
     </ion-col>
   </ion-row>

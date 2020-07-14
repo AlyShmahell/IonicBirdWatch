@@ -18,8 +18,6 @@ export class SignupPage implements OnInit {
   }
 
   processForm(event) {
-    console.log(event);
-    console.log(this.signup);
     axios.post(
       `http://127.0.0.1:5001/auth`,
       this.signup,
@@ -35,7 +33,6 @@ export class SignupPage implements OnInit {
     ).then(
       async (resp)=>{
         this.auth = resp;
-        console.log(this.auth);
         if (this.auth.data.message != undefined) {
           if (this.auth.data.message === "success"){
             await this.toast(this.auth.data.message, "green");

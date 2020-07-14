@@ -22,7 +22,6 @@ export class ManagePage implements OnInit {
     this.reset(undefined);
   }
   reset(event) {
-    console.log(event);
     this.data = {
       "fullname": "",
       "website": "",
@@ -47,11 +46,9 @@ export class ManagePage implements OnInit {
             "password": ""
           }
           if (this.data.photo != null && this.data.photo != "") {
-            console.log('op1');
             this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(this.data.photo);
           }
           else {
-            console.log('op2');
             this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/person.png');
           }
         }
@@ -71,7 +68,6 @@ export class ManagePage implements OnInit {
         resultType: CameraResultType.DataUrl,
         source: CameraSource.Camera
       });
-      console.log(image.dataUrl);
       this.photo = this.sanitizer.bypassSecurityTrustResourceUrl(image && (image.dataUrl));
       this.data.photo = image && (image.dataUrl);
       this.commitPhoto(undefined);
@@ -104,7 +100,6 @@ export class ManagePage implements OnInit {
     ).then(
       async (resp) => {
         res = resp;
-        console.log(res);
         if (res.data.message != undefined) {
           if (res.data.message === "success") {
             await this.toast(`${category} was updated successfully`, "green");
