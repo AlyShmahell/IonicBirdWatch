@@ -11,6 +11,7 @@ import { Style, Icon } from 'ol/style';
 import Point from 'ol/geom/Point';
 import { getDistance } from 'ol/sphere';
 import { defaults as defaultInteractions, DragRotateAndZoom } from 'ol/interaction';
+import TileJSON from 'ol/source/TileJSON';
 import { Injectable } from '@angular/core';
 import { SQLiteProvider } from './sqlite.provider';
 import { EventEmitterService } from './event.service';
@@ -44,7 +45,7 @@ export class fMapComponent implements OnInit {
     (async () => {
       var query = `SELECT * from filters where id=1`;
       var res = await this.db.dbInstance.executeSql(query);
-      if (typeof res.rows[0].textt === 'string' || res.rows[0].textt instanceof String){
+      if (typeof res.rows[0].textt === 'string' || res.rows[0].textt instanceof String) {
         this.text = res.rows[0].textt;
       }
     })();
@@ -90,6 +91,7 @@ export class fMapComponent implements OnInit {
         duration: 250000
       }
     });
+    var key = 'pk.eyJ1IjoidHNjaGF1YiIsImEiOiJjaW5zYW5lNHkxMTNmdWttM3JyOHZtMmNtIn0.CDIBD8H-G2Gf-cPkIuWtRg';
     this.map = new Map({
       interactions: defaultInteractions().extend([
         new DragRotateAndZoom()
@@ -98,7 +100,10 @@ export class fMapComponent implements OnInit {
       overlays: [overlay],
       layers: [
         new TileLayer({
-          source: new OSM()
+          source: new OSM(
+            {
+              url: 'https://tile.thunderforest.com/outdoors/{z}/{x}/{y}.png?apikey=d382bae9e2764ca28c73283ee2bfb0f8'
+            })
         })
       ],
       view: view
@@ -129,14 +134,16 @@ export class fMapComponent implements OnInit {
                                   <ion-thumbnail slot="start">
                                     <img src="${item.photo}"/>
                                   </ion-thumbnail>
+                                  <ion-label style="text-align: right">
+                                    <h4 style="text-align: right">${ item.dist}</h4>
+                                  </ion-label>
+                                </ion-item>
+                                <ion-item>
                                   <ion-label>
                                     <h2>${item.typ}</h2>
                                   </ion-label>
-                                  <ion-label>
-                                    <h4>${ item.species}</h4>
-                                  </ion-label>
-                                  <ion-label>
-                                    <h4>${ item.dist}</h4>
+                                  <ion-label style="text-align: right">
+                                    <h4 style="text-align: right">${ item.species}</h4>
                                   </ion-label>
                                 </ion-item>
                                 <ion-card-content>

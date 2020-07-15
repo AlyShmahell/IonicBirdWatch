@@ -11,7 +11,7 @@ import axios from 'axios';
 })
 export class ProfilePage implements OnInit {
 
-  photo: SafeResourceUrl;
+  photo: any = "";
   data: any;
 
   constructor(private sanitizer: DomSanitizer, private router: Router, public toastController: ToastController) {
@@ -112,6 +112,10 @@ export class ProfilePage implements OnInit {
 
   commitBio(val) {
     this.submit('bio');
+  }
+
+  ionViewWillEnter(){
+    this.reset(null);
   }
 }
 

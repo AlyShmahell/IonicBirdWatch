@@ -58,6 +58,7 @@
     "core-js": "^2.5.4",
     "cupertino-pane": "^1.1.64",
     "ionic-tags-input": "^0.1.2",
+    "jetifier": "^1.6.6",
     "lodash": "^4.17.15",
     "ngx-chips": "^2.1.0",
     "ol": "^6.3.1",

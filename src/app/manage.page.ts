@@ -12,7 +12,7 @@ import axios from 'axios';
 })
 export class ManagePage implements OnInit {
 
-  photo: SafeResourceUrl;
+  photo: any = "";
   data: any;
 
   constructor(private sanitizer: DomSanitizer, private router: Router, public toastController: ToastController) {
@@ -128,6 +128,31 @@ export class ManagePage implements OnInit {
   }
   commitPhoto(val) {
     this.submit('photo');
+  }
+
+  deleteAccount(){
+    axios.delete(
+      `http://127.0.0.1:5001/auth/profile`,
+      {
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Authorization": `Bearer ${document.cookie}`,
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/json"
+        },
+        withCredentials: true
+      }
+    ).then(
+      async (resp) => {
+          if (resp.status === 200) {
+            await this.toast(`account updated successfully`, "green");
+          }
+      }
+    ).catch(
+      async (err) => {
+        await this.toast(`could not delete account`, "red");
+      }
+    )
   }
 
 }

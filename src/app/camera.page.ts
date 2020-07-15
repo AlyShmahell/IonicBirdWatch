@@ -6,6 +6,7 @@ import { HttpClient } from "@angular/common/http";
 import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
+import { SQLiteProvider } from './sqlite.provider';
 
 @Component({
   selector: 'app-camera',
@@ -18,7 +19,7 @@ export class CameraPage {
   data: any;
   center: any;
 
-  constructor(private sanitizer: DomSanitizer, private geolocation: Geolocation, private http: HttpClient, private router: Router, public toastController: ToastController) {
+  constructor(private sanitizer: DomSanitizer, private geolocation: Geolocation, private http: HttpClient, private router: Router, public toastController: ToastController, private db: SQLiteProvider) {
     this.photo = this.sanitizer.bypassSecurityTrustResourceUrl('assets/img/icon.png');
     this.data = {
       "photo": "",
@@ -106,6 +107,13 @@ export class CameraPage {
         if (res.data.message != undefined) {
           if (res.data.message === "success") {
             await this.toast(res.data.message, "green");
+            var maxd = new Date();
+            maxd.setMonth(maxd.getMonth() -0);
+            var smaxd = maxd.toISOString();
+            var mind = new Date();
+            mind.setMonth(mind.getMonth() - 100);
+            var smind = mind.toISOString();
+            await this.db.dbInstance.executeSql(`UPDATE filters SET mind="${smind}", maxd="${smaxd}" WHERE id=1`);
             this.router.navigate(['/map']);
           }
         }
