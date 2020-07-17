@@ -1,13 +1,17 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
+import { IonicModule } from '@ionic/angular';
 import { RouterModule } from '@angular/router';
-import { MapPage } from './map.page';
+import { AddPage } from './add.page';
 import { ComponentsModule } from './components.module';
+import {IonTagsInputModule} from "./ionic-tags-input";
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   imports: [
+    IonTagsInputModule,
+    FontAwesomeModule,
     CommonModule,
     FormsModule,
     IonicModule,
@@ -15,10 +19,10 @@ import { ComponentsModule } from './components.module';
     RouterModule.forChild([
       {
         path: '',
-        component: MapPage
+        component: AddPage
       }
     ])
   ],
-  declarations: [MapPage]
+  declarations: [AddPage]
 })
-export class MapPageModule {}
+export class AddPageModule {}

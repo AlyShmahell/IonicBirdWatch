@@ -1,17 +1,13 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { CameraPage } from './camera.page';
+import { HomePage } from './home.page';
 import { ComponentsModule } from './components.module';
-import {IonTagsInputModule} from "./ionic-tags-input";
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 @NgModule({
   imports: [
-    IonTagsInputModule,
-    FontAwesomeModule,
     CommonModule,
     FormsModule,
     IonicModule,
@@ -19,10 +15,10 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
     RouterModule.forChild([
       {
         path: '',
-        component: CameraPage
+        component: HomePage
       }
     ])
   ],
-  declarations: [CameraPage]
+  declarations: [HomePage]
 })
-export class CameraPageModule {}
+export class HomePageModule {}

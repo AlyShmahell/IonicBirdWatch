@@ -1,17 +1,17 @@
-import { Component, AfterViewInit, OnInit, Input} from '@angular/core';
-import { CupertinoPane, CupertinoSettings } from 'cupertino-pane';
+import { Component, OnInit, Input} from '@angular/core';
+import { CupertinoPane } from 'cupertino-pane';
 import { Injectable } from '@angular/core';
 
 @Component({
-  selector: 'app-slide-drawer',
-  templateUrl: './slide-drawer.component.html',
-  styleUrls: ['./slide-drawer.component.scss'],
+  selector: 'app-drawer',
+  templateUrl: './drawer.component.html',
+  styleUrls: ['./drawer.component.scss'],
 })
  
 @Injectable({
   providedIn: 'root'
 })
-export class SlideDrawerComponent implements OnInit {
+export class DrawerComponent implements OnInit {
   drawer: CupertinoPane;
   @Input() selector: string = '';
   constructor() {}

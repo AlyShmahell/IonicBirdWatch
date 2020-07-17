@@ -1,19 +1,19 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
 
-import { SlideDrawerComponent } from './slide-drawer.component';
+import { EntitiesComponent } from './entities.component';
 
-describe('SlideDrawerComponent', () => {
-  let component: SlideDrawerComponent;
-  let fixture: ComponentFixture<SlideDrawerComponent>;
+describe('EntitiesComponent', () => {
+  let component: EntitiesComponent;
+  let fixture: ComponentFixture<EntitiesComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SlideDrawerComponent ],
+      declarations: [ EntitiesComponent ],
       imports: [IonicModule.forRoot()]
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SlideDrawerComponent);
+    fixture = TestBed.createComponent(EntitiesComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   }));

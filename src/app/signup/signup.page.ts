@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from "@angular/common/http";
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
 
@@ -12,7 +11,7 @@ import axios from 'axios';
 export class SignupPage implements OnInit {
   signup = {};
   auth: any;
-  constructor(private router: Router, private http: HttpClient, public toastController: ToastController) { }
+  constructor(private router: Router, public toastController: ToastController) { }
 
   ngOnInit() {
   }

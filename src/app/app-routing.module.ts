@@ -2,10 +2,22 @@ import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'signup', pathMatch: 'full' },
-  { path: 'map', loadChildren: () => import('./map.module').then(m => m.MapPageModule) },
-  { path: 'camera', loadChildren: () => import('./camera.module').then(m => m.CameraPageModule) },
-  { path: 'filters', loadChildren: () => import('./filters.module').then(m => m.FiltersPageModule) },
+  {
+    path: '', redirectTo: 'signup',
+    pathMatch: 'full'
+  },
+  {
+    path: 'map',
+    loadChildren: () => import('./home.module').then(m => m.HomePageModule)
+  },
+  {
+    path: 'camera',
+    loadChildren: () => import('./add.module').then(m => m.AddPageModule)
+  },
+  { 
+    path: 'filters', 
+    loadChildren: () => import('./filters.module').then(m => m.FiltersPageModule) 
+  },
   {
     path: 'signin',
     loadChildren: () => import('./signin/signin.module').then(m => m.SigninPageModule)

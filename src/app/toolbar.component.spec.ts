@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { AppToolBar } from './atoolbar.component';
+import { AppToolBar } from './toolbar.component';
 
 describe('AppToolBar', () => {
   let component: AppToolBar;
@@ -10,7 +9,7 @@ describe('AppToolBar', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ AppToolBar ],
-      imports: [IonicModule.forRoot(), HttpClientTestingModule]
+      imports: [IonicModule.forRoot()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppToolBar);

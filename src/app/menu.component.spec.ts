@@ -1,7 +1,6 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { IonicModule } from '@ionic/angular';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { AppMenu } from './amenu.component';
+import { AppMenu } from './menu.component';
 
 describe('AppMenu', () => {
   let component: AppMenu;
@@ -10,7 +9,7 @@ describe('AppMenu', () => {
   beforeEach(async(() => {
     TestBed.configureTestingModule({
       declarations: [ AppMenu ],
-      imports: [IonicModule.forRoot(), HttpClientTestingModule]
+      imports: [IonicModule.forRoot()]
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppMenu);

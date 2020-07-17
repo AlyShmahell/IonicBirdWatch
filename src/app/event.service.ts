@@ -13,7 +13,6 @@ export class EventEmitterService {
   constructor() { }    
 
   emit(src) { 
-    console.log(`emitting from ${src}`)   
     this.invoke.emit();    
   }    
 } 

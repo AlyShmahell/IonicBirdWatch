@@ -1,7 +1,6 @@
 
 import { Injectable } from '@angular/core';
 import { SQLite } from '@ionic-native/sqlite/ngx';
-import { Platform } from '@ionic/angular';
 import { SQLiteInstance } from './sqlite.instance';
 import { HttpClient } from "@angular/common/http";
 
@@ -24,7 +23,6 @@ export class SQLiteProvider {
 
   async init() {
     let isbrowser = document.URL.startsWith('http');
-    console.log("this platform is browser: ", isbrowser);
     if (isbrowser) {
       let db = window.openDatabase(SQL_DB_NAME, '1.0', 'DEV', 5 * 1024 * 1024);
       this.dbInstance = SQLiteInstance(db);

@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { MenuController } from '@ionic/angular';
 import { Injectable } from '@angular/core';
-import { HttpClient } from "@angular/common/http";
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
 
 
 @Component({
   selector: 'app-menu',
-  templateUrl: 'amenu.component.html',
-  styleUrls: ['amenu.component.scss'],
+  templateUrl: 'menu.component.html',
+  styleUrls: ['menu.component.scss'],
 })
 
 
@@ -19,7 +18,7 @@ import axios from 'axios';
 
 
 export class AppMenu {
-  constructor(private menu: MenuController, private http: HttpClient, public toastController: ToastController) {
+  constructor(private menu: MenuController, public toastController: ToastController) {
   }
   async openMenu() {
     if (! await this.menu.isEnabled()){

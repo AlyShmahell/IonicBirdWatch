@@ -23,8 +23,8 @@
 </ion-list>
 <ion-infinite-scroll
   threshold="100px"
-  (ionInfinite)="inflistload($event)"
-  [disabled]="inflistdisabled === true"
+  (ionInfinite)="entitiesload($event)"
+  [disabled]="entitiesdisabled === true"
 >
   <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="...">
   </ion-infinite-scroll-content>

@@ -73,7 +73,6 @@ export class ManagePage implements OnInit {
       this.commitPhoto(undefined);
     }
     catch (e) {
-      console.log('cancelled')
     }
   }
   uncapture() {

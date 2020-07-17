@@ -1,12 +1,12 @@
 import { Component, OnInit, Output, EventEmitter  } from '@angular/core';
 import { Injectable } from '@angular/core';
-import { AppMenu } from './amenu.component';
+import { AppMenu } from './menu.component';
 
 
 @Component({
   selector: 'app-toolbar',
-  templateUrl: 'atoolbar.component.html',
-  styleUrls: ['atoolbar.component.scss'],
+  templateUrl: 'toolbar.component.html',
+  styleUrls: ['toolbar.component.scss'],
 })
 
 

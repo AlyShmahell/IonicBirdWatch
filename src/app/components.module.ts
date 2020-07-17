@@ -4,19 +4,19 @@ import { IonicModule } from '@ionic/angular';
 import {HttpClientModule} from '@angular/common/http';
 import { HttpClient } from "@angular/common/http";
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { SlideDrawerComponent } from './slide-drawer.component';
-import { fMapComponent } from './fmap.component';
-import { InfListComponent } from './inflist.component';
+import { DrawerComponent } from './drawer.component';
+import { fMapComponent } from './map.component';
+import { EntitiesComponent } from './entities.component';
 import { Safe } from './safe.component';
-import {AppToolBar} from './atoolbar.component';
-import {AppMenu} from './amenu.component';
+import {AppToolBar} from './toolbar.component';
+import {AppMenu} from './menu.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 
 
 @NgModule({
-  declarations: [SlideDrawerComponent, fMapComponent, InfListComponent, Safe, AppToolBar, AppMenu],
+  declarations: [DrawerComponent, fMapComponent, EntitiesComponent, Safe, AppToolBar, AppMenu],
   imports: [
     FormsModule,
     CommonModule,
@@ -28,6 +28,6 @@ import { FormsModule } from '@angular/forms';
   providers: [
     HttpClient
   ],
-  exports: [SlideDrawerComponent, fMapComponent, InfListComponent, Safe, AppToolBar, AppMenu]
+  exports: [DrawerComponent, fMapComponent, EntitiesComponent, Safe, AppToolBar, AppMenu]
 })
 export class ComponentsModule { }
