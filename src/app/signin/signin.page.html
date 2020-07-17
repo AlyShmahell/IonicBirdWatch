@@ -21,6 +21,7 @@
         <ion-searchbar
           [(ngModel)]="signin.password"
           name="password"
+          class="password"
           showCancelButton="never"
           type="password"
           searchIcon=undefined
@@ -30,7 +31,7 @@
       <ion-item lines="none">
         <ion-card>
           <ion-card-content>
-            By signing up, you agree to the
+            By signing in, you agree to the
             <a [routerLink]="['/terms']">Terms of Service</a> and
             <a [routerLink]="['/privacy']">Privacy Policy</a>
           </ion-card-content>

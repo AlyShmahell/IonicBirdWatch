@@ -44,3 +44,26 @@ npx cap sync android
 - start the project inside the emulator.
 - change the proxy settings inside the emulator according to the following documentation [https://developer.android.com/studio/run/emulator-networking.html](https://developer.android.com/studio/run/emulator-networking.html).
 - start the app inside the emulator.
+
+## Views
+### Sign Up
+![signup](.readme/1.png)
+![signup](.readme/2.png)
+### Sign In
+![signin](.readme/3.png)
+![signin](.readme/4.png)
+### Home Page
+![signin](.readme/7.png)
+### Add
+![signin](.readme/5.png)
+### Options
+![signin](.readme/9.png)
+### Filters
+![signin](.readme/10.png)
+### Profile
+![signin](.readme/6.png)
+### Account
+![signin](.readme/8.png)
+### About Us
+![signin](.readme/11.png)
+
