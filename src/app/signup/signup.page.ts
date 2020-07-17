@@ -35,7 +35,7 @@ export class SignupPage implements OnInit {
         if (this.auth.data.message != undefined) {
           if (this.auth.data.message === "success"){
             await this.toast(this.auth.data.message, "green");
-            this.router.navigate(['/map']);
+            this.router.navigate(['/signin']);
           }
         }
       }
