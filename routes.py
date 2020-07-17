@@ -13,7 +13,7 @@ import functools
 
 
 headers = Headers()
-headers.add('Access-Control-Allow-Origin', 'http://localhost:8100')
+headers.add('Access-Control-Allow-Origin', 'http://127.0.0.1:8100')
 headers.add('Access-Control-Allow-Credentials', 'true')
 
 
