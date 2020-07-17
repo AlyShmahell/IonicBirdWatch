@@ -1,0 +1,19 @@
+<ion-content>
+  <ion-fab vertical="top" horizontal="start" slot="fixed" style="width: 100%;">
+    <ion-searchbar
+      showCancelButton="never"
+      style="width: 95%;"
+      color="violet"
+      [(ngModel)]="text"
+      (ionInput)="textInput($event)"
+      (ionClear)="textClear($event)"
+      (ionCancel)="textClear($event)"
+      value="text"
+    ></ion-searchbar>
+  </ion-fab>
+  <div id="map" class="map"></div>
+</ion-content>
+<div id="ol-popup" class="ol-popup">
+  <a href="#" id="ol-popup-closer" class="ol-popup-closer"></a>
+  <div id="ol-popup-content"></div>
+</div>

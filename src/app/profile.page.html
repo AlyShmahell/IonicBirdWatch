@@ -1,0 +1,86 @@
+<app-toolbar (deteriorated)="reset($event)"></app-toolbar>
+
+<ion-grid no-padding style="width: 84%; margin: 8%;" ion-align-items-center>
+  <ion-row class="ion-align-items-center" style="margin: 10% 0 10% 0;">
+    <ion-col size="12" class="ion-text-center">
+      <ion-label class="subtitle" color="green">Profile</ion-label>
+    </ion-col>
+  </ion-row>
+  <ion-row class="ion-align-items-center" style="margin: 10% 0 10% 0;">
+    <ion-col size="12" class="ion-text-center">
+      <div class="button-belt">
+        <img
+          style="border: none; padding: 0 !important; margin: 0 !important;"
+          [src]="photo"
+        />
+      </div>
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-12 align-items-start>
+      <ion-searchbar
+        [(ngModel)]="data.fullname"
+        (ionBlur)="commitfullname()"
+        name="fullname"
+        showCancelButton="never"
+        type="text"
+        searchIcon="person-circle-outline"
+        placeholder="fullname"
+      ></ion-searchbar>
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-12 align-items-start>
+      <ion-searchbar
+        [(ngModel)]="data.website"
+        (ionBlur)="commitWebsite()"
+        name="website"
+        showCancelButton="never"
+        type="text"
+        searchIcon="planet-outline"
+        placeholder="website"
+      ></ion-searchbar>
+    </ion-col>
+  </ion-row>
+  <ion-row ion-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-12 align-items-start>
+      <ion-searchbar
+        class="invisible"
+        name="none"
+        showCancelButton="never"
+        type="text"
+        searchIcon="information-circle-outline"
+        placeholder=""
+        disabled
+      ></ion-searchbar>
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-12 align-items-start>
+      <ion-list>
+        <ion-item text-wrap>
+          <ion-textarea (ionBlur)="commitBio()" [(ngModel)]="data.bio"></ion-textarea>
+        </ion-item>
+      </ion-list>
+    </ion-col>
+  </ion-row>
+  <ion-row no-padding justify-content-start align-items-start>
+    <ion-col ion-item no-lines no-padding text-center col-12 align-items-start>
+      <ion-item class="center-button" lines="none">
+        <ion-button
+          expand="block"
+          [routerLink]="['/manage']"
+          (click) = "reset($event)"
+          class="ion-no-margin"
+          color="grey"
+          style="width:100%; height: 100%;"
+          color="red"
+          >Manage</ion-button
+        >
+      </ion-item>
+    </ion-col>
+  </ion-row>
+</ion-grid>
+
+
+

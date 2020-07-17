@@ -1,0 +1,31 @@
+<ion-list>
+  <ion-item *ngFor="let item of items">
+    <ion-card>
+      <ion-item>
+        <ion-thumbnail slot="start">
+          <ion-img [src]="item.photo"></ion-img>
+        </ion-thumbnail>
+        <ion-label>
+          <h2>{{ item.type }}</h2>
+        </ion-label>
+        <ion-label >
+          <h4>{{ item.species }}</h4>
+        </ion-label>
+        <ion-label>
+          <h4>{{ item.dist }}</h4>
+        </ion-label>
+      </ion-item>
+      <ion-card-content>
+        {{ item.notes }}
+      </ion-card-content>
+    </ion-card>
+  </ion-item>
+</ion-list>
+<ion-infinite-scroll
+  threshold="100px"
+  (ionInfinite)="entitiesload($event)"
+  [disabled]="entitiesdisabled === true"
+>
+  <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="...">
+  </ion-infinite-scroll-content>
+</ion-infinite-scroll>

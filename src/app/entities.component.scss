@@ -1,0 +1,17 @@
+ion-card {
+  display: flex;
+  flex-direction: column;
+  width: 100% !important;
+  margin: 4% !important;
+}
+
+ion-thumbnail {
+  width: 25vw;
+  height: 25vw;
+  border-radius: 4;
+  img {
+    width: auto !important;
+    height: auto !important;
+    border-radius: 4;
+  }
+}

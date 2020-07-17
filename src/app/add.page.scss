@@ -1,0 +1,36 @@
+:root {
+    --ion-safe-area-top: 20px;
+    --ion-safe-area-bottom: 22px;
+  }
+  ion-button{
+    --ion-color-primary: #009E0F;
+    --ion-color-primary-shade: black !important;
+    --ion-color-primary-tint: black !important;
+  }
+  ion-button.danger{
+    --ion-color-primary: #990000;
+    --ion-color-primary-shade: black !important;
+    --ion-color-primary-tint: black !important;
+  }
+  ion-col{
+    ion-input{
+       border-bottom: solid 1px black;
+    }
+    ion-textarea{
+       border-bottom: solid 1px black;
+    }
+ }
+
+ .subtitle{
+  font-size: 24px;
+  text-align: center;
+  width: 100%;
+ }
+
+ .center {
+  margin: auto;
+  width: 50%;
+  border: none;
+  text-align: center;
+  padding-top: 10%;
+}
