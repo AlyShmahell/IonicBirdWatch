@@ -12,7 +12,3 @@ def img2base64(path):
     iobuf  = io.BytesIO(imbuff)
     imbyte = iobuf.getvalue()
     return  base64.b64encode(imbyte).decode("ascii")
-
-if __name__ == '__main__':
-    with open('icon.txt', 'w') as f:
-        f.write(img2base64('icon.png'))

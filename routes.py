@@ -1,4 +1,4 @@
-import os, sys, json
+import os, sys, json, re
 import datetime
 from flask import Response
 from flask_restful import Resource, request, abort
@@ -13,7 +13,8 @@ import functools
 
 
 headers = Headers()
-headers.add('Access-Control-Allow-Origin', '*')
+headers.add('Access-Control-Allow-Origin', 'http://localhost:8100')
+headers.add('Access-Control-Allow-Credentials', 'true')
 
 
 def has_role(role=None):
@@ -24,7 +25,7 @@ def has_role(role=None):
                 value = func(*args, **kwargs)
                 return value
             else:
-                abort(403, error_message=f"({current_user.fullname} != {role}) => permission denied")
+                abort(403, error_message=f"({current_user.fullname} != {role}) => permission denied", headers = headers)
         return wrapper
     return decorator
 
@@ -45,7 +46,8 @@ class Auth(Resource):
                     "message": "account already exists"
                     }),
                 status=409,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
             new_user = Users(username=username, 
                              fullname=fullname, 
@@ -75,7 +77,8 @@ class Auth(Resource):
                             "message": "account does not exist"
                             }),
                         status=404,
-                        mimetype="application/json"
+                        mimetype="application/json",
+                        headers = headers
                     )
                 login_user(user, remember=True, force=True)
                 return Response(
@@ -84,7 +87,8 @@ class Auth(Resource):
                         'role': user.roles[0].name
                         }),
                     status=200,
-                    mimetype="application/json"
+                    mimetype="application/json",
+                    headers = headers
                 )
             except:
                 return Response(
@@ -92,7 +96,8 @@ class Auth(Resource):
                     "message": "incorrect credentials"
                     }),
                 status=401,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
     @login_required
     def delete(self):
@@ -102,7 +107,8 @@ class Auth(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
 
 
@@ -112,6 +118,10 @@ class AuthProfile(Resource):
     def get(self):
         user = Users.query.filter_by(username=current_user.username).first() 
         if user:
+            if user.photo is None:
+                user.photo = ""
+            else:
+                user.photo = user.photo.decode("utf8")
             return Response(
                 response = json.dumps({
                     "data": {'username': user.username, 
@@ -122,15 +132,17 @@ class AuthProfile(Resource):
                     'photo': user.photo}
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
         else:
-            abort(404, error_message=f"user does not exist")
+            abort(404, error_message=f"user does not exist", headers = headers)
     @login_required
     @has_role('user')
     def delete(self):
         user = Users.query.filter_by(username=current_user.username).first() 
         if user:
+            WildLife.query.filter_by(userid=user.id).update({'userid': -1})
             db.session.delete(user)
             db.session.commit()
             logout_user()
@@ -139,10 +151,11 @@ class AuthProfile(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
         else:
-            abort(404, error_message=f"user does not exist")
+            abort(404, error_message=f"user does not exist", headers = headers)
 
 
 class AuthProfileCat(Resource):
@@ -150,6 +163,8 @@ class AuthProfileCat(Resource):
     @has_role('user')
     def put(self, category):
         value = request.json.get('value')
+        if category == 'photo':
+            value = value.encode('utf_8')
         user = Users.query.filter_by(username=current_user.username).first() 
         mapper = {
             'password': Users.password,
@@ -159,6 +174,8 @@ class AuthProfileCat(Resource):
             'photo': Users.photo
         }
         try:
+            if category == 'password':
+                value = generate_password_hash(value, method='sha256')
             success = Users.query.filter_by(username=current_user.username).update({mapper[category]: value})
             db.session.commit()
             return Response(
@@ -166,17 +183,18 @@ class AuthProfileCat(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
         except:
-            abort(404, error_message=f"user does not exist")
+            abort(404, error_message=f"user does not exist", headers = headers)
 
 class AuthProfileDel(Resource):
     @login_required
     @has_role('curator')
     def delete(self, userid):
         if userid == current_user.id:
-            abort(403, error_message=f"curator cannot delete self")
+            abort(403, error_message=f"curator cannot delete self", headers = headers)
         user    = Users.query.filter_by(id=userid).first() 
         if user:
             db.session.delete(user)
@@ -186,10 +204,11 @@ class AuthProfileDel(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
         else:
-            abort(403, error_message=f"user id does not exist")
+            abort(403, error_message=f"user id does not exist", headers = headers)
 
 
 class AuthWildLife(Resource):
@@ -203,18 +222,18 @@ class AuthWildLife(Resource):
             info["notes"]    = request.json.get('notes')
             info["photo"]    = request.json.get('photo').encode('utf_8')
             info["date"]     = request.json.get('date')
-            info["lon"]      = float(json.loads(request.json.get('lon')))
-            info["lat"]      = float(json.loads(request.json.get('lat')))
+            info["lon"]      = float(request.json.get('lon'))
+            info["lat"]      = float(request.json.get('lat'))
         except:
-            abort(422, error_message=f"wrong wilflife dictionary keys")
+            abort(422, error_message=f"wrong wilflife dictionary keys", headers = headers)
         if any(x 
                for x in info.values() 
                if x == None):
-            abort(422, error_message=f"empty wilflife dictionary values")
+            abort(422, error_message=f"empty wilflife dictionary values", headers = headers)
         info["date"] = datetime.datetime.strptime(info["date"], '%Y-%m-%dT%H:%M:%S.%fZ')
         wildlife = WildLife.query.filter_by(photo=info["photo"]).first() 
         if wildlife:
-            abort(409, error_message=f"wildlife entry already exists")
+            abort(409, error_message=f"wildlife entry already exists", headers = headers)
         new_wildlife = WildLife(type=info["type"], 
                                 species=info["species"], 
                                 notes=info["notes"],
@@ -230,13 +249,15 @@ class AuthWildLife(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
     @login_required
     def get(self):
         info = {}
         try:
-            info["text"]     = str(request.args.get('text')).strip("\"")
+            info["text"]     = str(request.args.get('text'))
+            info["text"]     = re.sub(r'[\'\"]', '', info["text"])
             info["maxd"]     = datetime.datetime.strptime(request.args.get('maxd'), '%Y-%m-%dT%H:%M:%S.%fZ')
             info["mind"]     = datetime.datetime.strptime(request.args.get('mind'), '%Y-%m-%dT%H:%M:%S.%fZ')
             info["by"]       = request.args.get('by')
@@ -245,7 +266,7 @@ class AuthWildLife(Resource):
             info["lat"]      = float(request.args.get('lat'))
             info["area"]     = float(request.args.get('area'))
         except:
-            abort(422, error_message=f"wrong query keys")
+            abort(422, error_message=f"wrong query keys", headers = headers)
         info = {k:v for k, v in info.items() if v is not None}
         wildlife = WildLife.query.filter(
                                     (
@@ -283,7 +304,8 @@ class AuthWildLife(Resource):
                     "data": wf
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
 
 class GuestWildLifeOne(Resource):
@@ -299,12 +321,13 @@ class GuestWildLifeOne(Resource):
                     "data": wildlife
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
             else:
-                abort(403, error_message=f"wildlife id does not exist")
+                abort(403, error_message=f"wildlife id does not exist", headers = headers)
         else:
-            abort(422, error_message=f"no wildlife id provided")
+            abort(422, error_message=f"no wildlife id provided", headers = headers)
 
 class GuestWildLifeMany(Resource):
     def get(self):
@@ -319,7 +342,7 @@ class GuestWildLifeMany(Resource):
             info["lat"]      = float(request.args.get('lat'))
             info["area"]     = float(request.args.get('area'))
         except:
-            abort(422, error_message=f"wrong query keys")
+            abort(422, error_message=f"wrong query keys", headers = headers)
         info = {k:v for k, v in info.items() if v is not None}
         wildlife = WildLife.query.filter(
                                     (
@@ -361,14 +384,14 @@ class GuestReport(Resource):
             info["text"]       = str(request.json.get('text')).strip("\"")
             info["wildlifeid"] = int(request.json.get('wildlifeid'))
         except:
-            abort(422, error_message=f"wrong report dictionary keys")
+            abort(422, error_message=f"wrong report dictionary keys", headers = headers)
         if any(x 
                for x in info.values() 
                if x == None):
-            abort(422, error_message=f"empty report dictionary values")
+            abort(422, error_message=f"empty report dictionary values", headers = headers)
         wildlife = WildLife.query.filter_by(id = info["wildlifeid"]).first()
         if not wildlife:
-            abort(404, error_message=f"wildlife entry does not exist")
+            abort(404, error_message=f"wildlife entry does not exist", headers = headers)
         new_report = Reports(text=info["text"], 
                              code=info["code"], 
                              wildlifeid=info["wildlifeid"],
@@ -380,7 +403,8 @@ class GuestReport(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
             )
 
 
@@ -398,12 +422,12 @@ class AuthReport(Resource):
             cascade = False
         report = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).first()
         if not report:
-            abort(404, error_message=f"report entry does not exist")
+            abort(404, error_message=f"report entry does not exist", headers = headers)
         try:
             success = Reports.query.filter(Reports.id==reportid).filter(Reports.resolved == False).update({'resolved': True, 'userid': current_user.id})
             db.session.commit()
         except:
-            abort(404, error_message=f"report entry does not exist")
+            abort(404, error_message=f"report entry does not exist", headers = headers)
         if cascade:
             try:
                 reports = Reports.query.filter(Reports.wildlifeid == report.wildlifeid)\
@@ -417,7 +441,8 @@ class AuthReport(Resource):
                     "message": "success"
                     }),
                 status=200,
-                mimetype="application/json"
+                mimetype="application/json",
+                headers = headers
         )
     @login_required
     @has_role('curator')
@@ -434,8 +459,7 @@ class AuthReport(Resource):
             db.session.delete(report)
             db.session.commit()
         except:
-            abort(404, error_message=f"report entry does not exist")
-        print(wildlifeid)
+            abort(404, error_message=f"report entry does not exist", headers = headers)
         if cascade:
             try:
                 try:
@@ -454,5 +478,6 @@ class AuthReport(Resource):
                         "message": "success"
                         }),
                     status=200,
-                    mimetype="application/json"
+                    mimetype="application/json",
+                headers = headers
                 )

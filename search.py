@@ -1,12 +1,21 @@
 
 import re
 import pandas as pd
-import nltk 
-from   nltk          import pos_tag
-from   nltk.tokenize import word_tokenize
-from   nltk.corpus   import stopwords
-from   nltk.stem     import WordNetLemmatizer
-from   nltk.corpus   import wordnet as wn
+try:
+    import nltk 
+    from   nltk          import pos_tag
+    from   nltk.tokenize import word_tokenize
+    from   nltk.corpus   import stopwords
+    from   nltk.stem     import WordNetLemmatizer
+    from   nltk.corpus   import wordnet as wn
+except:
+    nltk.download('popular')
+    import nltk 
+    from   nltk          import pos_tag
+    from   nltk.tokenize import word_tokenize
+    from   nltk.corpus   import stopwords
+    from   nltk.stem     import WordNetLemmatizer
+    from   nltk.corpus   import wordnet as wn
 from   collections   import defaultdict
 from   sklearn.feature_extraction.text import TfidfVectorizer
 from   sklearn.metrics.pairwise        import cosine_similarity

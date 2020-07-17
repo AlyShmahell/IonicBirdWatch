@@ -36,17 +36,6 @@ class Roles(db.Model, AllowancesMixin):
     name   = db.Column(db.String(255), nullable=False)
 
 
-"""class GPS(object):
-    def __init__(self, lat, lon):
-        self.data = set([lat, lon])
-    def __hash__(self):
-        return hash(",".join([str(x) for x in self.data]))
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.data == other.data
-        return NotImplemented"""
-
-
 class WildLife(db.Model):
     __tablename__ = 'wildlife'
     id         = db.Column(db.Integer, primary_key=True)

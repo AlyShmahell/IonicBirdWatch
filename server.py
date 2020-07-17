@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from flask_restful import Api
+from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import Roles, Users, ReportCodes, db, authorize, login_manager
 from routes import (Auth, 
@@ -16,6 +17,7 @@ from routes import (Auth,
 
 if __name__ == '__main__':
     app = Flask('WildWatch')
+    CORS(app, supports_credentials=True)
     app.config['SECRET_KEY']                     = str(os.urandom(24).hex())
     app.config['SQLALCHEMY_DATABASE_URI']        = 'sqlite:///db.sqlite'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -44,6 +46,13 @@ if __name__ == '__main__':
             new_role = Roles(id=2, 
                              name='user')
             db.session.add(new_role)
+            db.session.commit()
+            new_user = Users(id = -1,
+                             username='master', 
+                             fullname='master', 
+                             password=generate_password_hash(str(os.urandom(24).hex()), 
+                                                                method='sha256'))
+            db.session.add(new_user)
             db.session.commit()
             new_user = Users(username='curator', 
                              fullname='curator', 
