@@ -1,9 +1,7 @@
 import os, time, json, re
 from io import BytesIO
 import zipfile
-import tempfile
 from flask import Flask, session, redirect, url_for, request, render_template, send_from_directory, make_response, send_file
-from markupsafe import escape
 import requests
 import argparse
 import functools
