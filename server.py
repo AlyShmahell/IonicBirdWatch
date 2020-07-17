@@ -123,7 +123,7 @@ def curator():
             else:
                 entry['distance'] = f"{entry['distance']}m"
             entry['center'] = [entry['lon'], entry['lat']]
-            entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
+            entry['cardid'] = f"{np.round(entry['lon'], 1)}_{np.round(entry['lat'], 1)}".replace('.', '_')
         if xhr:
             return render_template('curator-list.html', data=wildlife)
     else:
@@ -155,7 +155,7 @@ def guest():
             else:
                 entry['distance'] = f"{entry['distance']}m"
             entry['center'] = [entry['lon'], entry['lat']]
-            entry['cardid'] = f"{entry['lon']}_{entry['lat']}".replace('.', '_')
+            entry['cardid'] = f"{np.round(entry['lon'], 1)}_{np.round(entry['lat'], 1)}".replace('.', '_')
         if xhr:
             return render_template('guest-list.html', data=wildlife)
     else:
