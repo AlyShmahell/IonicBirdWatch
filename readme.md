@@ -1,6 +1,14 @@
 # WildWatch-RESTful
 **WildWatch** is an app which helps people keep track of wildlife, it provides a map to add and view information on wildlife collected by both professionals and enthusiasts. It provides tools to narrow down a certain search pattern, and a way to provide data to a centralized database and get credit for the collected data, the collected data will be used in another open project.
 
+
+## Authors
+|First Name|Last Name| ID | Role in Project|
+|:-:|:-:|:-:|:-:|
+|Aly|Shmahell|258912| Lead/Solo Developer|
+
+<div style="page-break-after: always;"></div>
+
 ## Instructions
 
 ### Download
