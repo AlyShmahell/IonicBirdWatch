@@ -41,11 +41,11 @@ python server.py
 <div style="page-break-after: always;"></div>
 
 # WildWatch-RESTful Problems
-- MySQL was buggy on the development machine and the issues piled up, therefore SQLite was chosen as a proper replacement for rapid prototyping keeping in mind that in the future MySQL will replace it.  
+- MySQL was chosen as the default database backbone because of its compatibility with SQLAlchemy, however it was buggy on the development machine and the issues piled up, therefore SQLite was chosen as a proper replacement for rapid prototyping keeping in mind that in the future MySQL will replace it.  
 
-- SQLite does not support math functions, some of which (sin, cos, arctan) are required for correct calculation of distances between longitude/latitude points on a globe, however extension-functions can be found in the `ext` directory, with the official documentation on how to compile them for the target operating system present in the main file `extension-functions.c`, these were compiled on the development machine and wrapped/loaded in `server.py`.  
+- SQLite does not support math functions, some of which (sin, cos, arctan) are required for correct calculation of distances between longitude/latitude points on a globe, however mathematical extension functions for SQLite can be found in the `ext` directory, with the official documentation on how to compile them for the target operating system present in the main file `extension-functions.c`, these were compiled on the development machine and wrapped/loaded in `server.py`.  
 
-- SQLite handles boolean operations as numerical values, while SQLalchemy supplies symbolic values, which resulted in a bug, therefore calculating distances between points has been disabled and replaced by a crude inaccurate method for the moment and once MySQL is up and running we will revert back to the correct method.
+- SQLite handles boolean operations as numerical values, while SQLalchemy supplies symbolic values, which resulted in a bug, therefore comparing distances between points has been disabled and replaced by a crude inaccurate method for the moment and once MySQL is up and running we will revert back to the correct method.
 
 <div style="page-break-after: always;"></div>
 
