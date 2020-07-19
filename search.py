@@ -22,6 +22,7 @@ from   sklearn.metrics.pairwise        import cosine_similarity
 
 
 def WordLemmatizer(data):
+    """provides Word Lemmatization for correct search functionality"""
     tag_map = defaultdict(lambda : wn.NOUN)
     tag_map['J'] = wn.ADJ
     tag_map['V'] = wn.VERB
@@ -42,6 +43,7 @@ def WordLemmatizer(data):
 
 
 def SearchEngine(documents, query, theshold):
+    """provides search capability via TFIDF"""
     try:
         assert len(documents) != 0
         assert all(bool(type(document) == str and len(document.strip()) != 0) for document in documents)

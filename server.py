@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
+from flask_sqlalchemy import event
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import Roles, Users, ReportCodes, db, authorize, login_manager
 from routes import (Auth, 
@@ -15,6 +16,21 @@ from routes import (Auth,
                     GuestReport)
 
 
+def sqlitext(app):
+    """loads sqlite extenstions into flask_sqlalchemy"""
+    with app.app_context():
+        @event.listens_for(db.engine, "first_connect")
+        def connect(sqlite, connection_rec):
+            sqlite.enable_load_extension(True)
+            sqlite.execute("SELECT load_extension('./ext/libsqlitefunctions.so')")
+            sqlite.enable_load_extension(False)
+        @event.listens_for(db.engine, "connect")
+        def connect(sqlite, connection_rec):
+            sqlite.enable_load_extension(True)
+            sqlite.execute("SELECT load_extension('./ext/libsqlitefunctions.so')")
+            sqlite.enable_load_extension(False)
+
+
 if __name__ == '__main__':
     app = Flask('WildWatch')
     CORS(app, supports_credentials=True)
@@ -24,6 +40,7 @@ if __name__ == '__main__':
     app.config['FLASK_DEBUG']                    = True
     authorize.init_app(app)
     db.init_app(app)
+    # sqlitext(app)
     login_manager.init_app(app)
     api = Api(app)
     api.add_resource(Auth,              '/auth')
@@ -35,7 +52,6 @@ if __name__ == '__main__':
     api.add_resource(GuestWildLifeMany, '/guest/wildlife')
     api.add_resource(GuestWildLifeOne,  '/guest/wildlife/<int:wildlifeid>')
     api.add_resource(GuestReport,       '/guest/report')
-
     if not os.path.exists('db.sqlite'):
         with app.app_context():
             db.create_all()

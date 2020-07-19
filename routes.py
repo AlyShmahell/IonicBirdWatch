@@ -1,3 +1,4 @@
+"""provides resource logic allocation"""
 import os, sys, json, re
 import datetime
 from flask import Response
@@ -18,6 +19,11 @@ headers.add('Access-Control-Allow-Credentials', 'true')
 
 
 def has_role(role=None):
+    """
+    - checks whether or not a user has a specific role
+    - parameters:
+        - role: string
+    """
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -31,7 +37,16 @@ def has_role(role=None):
 
 
 class Auth(Resource):
+    """allocated logic for resource `/auth`"""
     def post(self):
+        """
+        - url `/auth` verb `POST`
+        - input:
+            - username: string
+            - password: string
+            - fullname: string
+        - `Semantics: If fullname is not empty then it creates a new user account based on the provided credentials. Otherwise it establishes a Session based on the provided credentials.`
+        """
         username = request.json.get('username')
         password = request.json.get('password')
         fullname = request.json.get('fullname')
@@ -101,6 +116,10 @@ class Auth(Resource):
             )
     @login_required
     def delete(self):
+        """
+        - url `/auth` verb `DELETE`
+        - `Semantics: closes the Session.`
+        """
         logout_user()
         return Response(
                 response = json.dumps({
@@ -113,9 +132,15 @@ class Auth(Resource):
 
 
 class AuthProfile(Resource):
+    """allocated logic for resource `/auth/profile`"""
     @login_required
     @has_role('user')
     def get(self):
+        """
+        - url `/auth/profile` verb `GET`
+        - `output: {'fullname': str, 'website': str, 'bio': str, 'photo': image/jpeg}`
+        - `Semantics: returns the user profile information associated with the Session. This resource is only available to users; if the Session belongs to a curator, the return status would be 403 Forbidden.`
+        """
         user = Users.query.filter_by(username=current_user.username).first() 
         if user:
             if user.photo is None:
@@ -140,6 +165,10 @@ class AuthProfile(Resource):
     @login_required
     @has_role('user')
     def delete(self):
+        """
+        - url `/auth/profile` verb `DELETE`
+        - `Semantics: deletes the user account then closes the Session. This resource is only available to users; if the Session belongs to a curator, the return status would be 403 Forbidden.`
+        """
         user = Users.query.filter_by(username=current_user.username).first() 
         if user:
             WildLife.query.filter_by(userid=user.id).update({'userid': -1})
@@ -159,9 +188,15 @@ class AuthProfile(Resource):
 
 
 class AuthProfileCat(Resource):
+    """allocated logic for resource `/auth/profile/{category}`"""
     @login_required
     @has_role('user')
     def put(self, category):
+        """
+        - url `/auth/profile/{category}` verb `PUT`
+        - `input: { 'value': string | base64 }`
+        - `Semantics: updates the user info according to the {category}, which could be: fullname, website, bio, password, or photo. This resource is only available to users; if the Session belongs to a curator, the return status would be 403 Forbidden.`
+        """
         value = request.json.get('value')
         if category == 'photo':
             value = value.encode('utf_8')
@@ -190,9 +225,14 @@ class AuthProfileCat(Resource):
             abort(404, error_message=f"user does not exist", headers = headers)
 
 class AuthProfileDel(Resource):
+    """allocated logic for resource `/auth/profile/{userid}`"""
     @login_required
     @has_role('curator')
     def delete(self, userid):
+        """
+        - url `/auth/profile/{userid}` verb `DELETE`
+        - `Semantics: deletes the user account associated with {userid}; if and only if the Session belongs to a curator and {userid} belongs to a user. Otherwise the return status would be 403 Forbidden.`
+        """
         if userid == current_user.id:
             abort(403, error_message=f"curator cannot delete self", headers = headers)
         user    = Users.query.filter_by(id=userid).first() 
@@ -212,9 +252,22 @@ class AuthProfileDel(Resource):
 
 
 class AuthWildLife(Resource):
+    """allocated logic for resource `/auth/wildlife`"""
     @login_required
     @has_role('user')
     def post(self):
+        """
+        - url `/auth/wildlife` verb `POST`
+        - input:
+            - type: string
+            - species: string
+            - notes: string
+            - photo: base64 string
+            - date: iso datetime string
+            - lon: float, longitude
+            - lat: float, latitude
+        - `Semantics: submits a new wildlife entry to the wildlife table. This resource is only available to users; if the Session belongs to a curator, the return status would be 403 Forbidden.`
+        """
         info = {}
         try:
             info["type"]     = request.json.get('type')
@@ -254,6 +307,24 @@ class AuthWildLife(Resource):
             )
     @login_required
     def get(self):
+        """
+        - url `/auth/wildlife` verb `GET`
+        - arguments:
+            - text: string
+            - mind: iso datetime string
+            - maxd: iso datetime string
+            - by: string
+            - type: array of strings
+            - lon: float, longitude
+            - lat: float, latitude
+            - area: float
+        - output: 
+            - if the Session belongs to a user account:
+                - `[{'wildlifeid': int, 'type': str, 'species': str, 'photo': image/jpeg, 'notes': str, 'lon': float, 'lat': float, 'date': int},]`
+            - if the Session belongs to a curator account:
+                - `[{'wildlifeid': int, 'type': str, 'species': str, 'photo': image/jpeg, 'notes': str, 'lon': float, 'lat': float, 'date': int, 'userid': int, 'reports': [ {'reportid': int, 'code': int, 'text': str}, ]},]`
+        - `Semantics: fetches all the wildlife entries in the wildlife table based on the user’s or curator’s longitude and latitude and the size of their map area, the results are filtered by first matching the filters (mind=datetime&maxd=datetime&by=str&type=[str]) part of the query to the wildlife table columns using an SQL WHERE clause, and then by matching the text part of the query to the notes column in the wildlife table using an off-the-shelf TFIDF algorithm. If the Session belongs to a curator account, the filtering process is also applied on the reports table, then only wildlife entries with unresolved reports matching their ‘wildlifeid’ will be returned in the response, with a copy of the reports added to the response.`
+        """
         info = {}
         try:
             info["text"]     = str(request.args.get('text'))
@@ -308,29 +379,23 @@ class AuthWildLife(Resource):
                 headers = headers
             )
 
-class GuestWildLifeOne(Resource):
-    def get(self, wildlifeid=None):
-        if wildlifeid is not None:
-            wildlife =  WildLife.query.filter_by(id=wildlifeid).first()
-            if wildlife:
-                wildlife = {k: v for k,v in vars(wildlife).items() if not k.startswith('_')}
-                wildlife['date']   = wildlife['date'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-                wildlife['photo']  = wildlife['photo'].decode("utf8")
-                return Response(
-                response = json.dumps({
-                    "data": wildlife
-                    }),
-                status=200,
-                mimetype="application/json",
-                headers = headers
-            )
-            else:
-                abort(403, error_message=f"wildlife id does not exist", headers = headers)
-        else:
-            abort(422, error_message=f"no wildlife id provided", headers = headers)
-
 class GuestWildLifeMany(Resource):
+    """allocated logic for resource `/guest/wildlife`"""
     def get(self):
+        """
+        - url `/guest/wildlife` verb `GET`
+        - arguments:
+            - text: string
+            - mind: iso datetime string
+            - maxd: iso datetime string
+            - by: string
+            - type: array of strings
+            - lon: float, longitude
+            - lat: float, latitude
+            - area: float
+        - `output: [{'wildlifeid': int, 'type': str, 'species': str, 'photo': image/jpeg, 'notes': str, 'lon': float, 'lat': float,, 'date': int},]`
+        - `Semantics: fetches all the wildlife entries in the wildlife table based on the guest’s chosen longitude and latitude and the size of their map area, the results are filtered first by matching the filters (mind=datetime&maxd=datetime&by=str&type=[str]) part of the query to the wildlife table columns using an SQL WHERE clause, and then by matching the text part of the query to the notes column in the wildlife table using an off-the-shelf TFIDF algorithm.`
+        """
         info = {}
         try:
             info["text"]     = str(request.args.get('text')).strip("\"")
@@ -375,9 +440,45 @@ class GuestWildLifeMany(Resource):
             )
 
 
+class GuestWildLifeOne(Resource):
+    """allocated logic for resource `/guest/wildlife/{wildlifeid}`"""
+    def get(self, wildlifeid=None):
+        """
+        - url `/guest/wildlife/{wildlifeid}` verb `GET`
+        - `output: {'wildlifeid': int, 'type': str, 'species': str, 'photo': image/jpeg, 'notes': str, 'lon': float, 'lat': float, 'date': int}`
+        - `Semantics: downloads a single wildlife entry from the wildlife table according to its {wildlifeid}. The response ‘Content-Disposition’ is set to ‘attachment’ and the output value will be a json file containing the output json object.`
+        """
+        if wildlifeid is not None:
+            wildlife =  WildLife.query.filter_by(id=wildlifeid).first()
+            if wildlife:
+                wildlife = {k: v for k,v in vars(wildlife).items() if not k.startswith('_')}
+                wildlife['date']   = wildlife['date'].strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                wildlife['photo']  = wildlife['photo'].decode("utf8")
+                return Response(
+                response = json.dumps({
+                    "data": wildlife
+                    }),
+                status=200,
+                mimetype="application/json",
+                headers = headers
+            )
+            else:
+                abort(403, error_message=f"wildlife id does not exist", headers = headers)
+        else:
+            abort(422, error_message=f"no wildlife id provided", headers = headers)
+
 
 class GuestReport(Resource):
+    """allocated logic for resource `/guest/report`"""
     def post(self):
+        """
+        - url `/guest/report` verb `POST`
+        - input:
+            - code: integer, report code
+            - text: string, report body
+            - wildlifeid: integer, wildlife entry being reported
+        - `Semantics: submits a new report about a wildlife entry to the reports table, the report could be about animal abuse, improper fire, fake entries ...etc.`
+        """
         info = {}
         try:
             info["code"]       = int(request.json.get('code'))
@@ -410,9 +511,16 @@ class GuestReport(Resource):
 
 
 class AuthReport(Resource):
+    """allocated logic for resource `/auth/report/{reportid}`"""
     @login_required
     @has_role('curator')
     def put(self, reportid):
+        """
+        - url `/auth/report/{reportid}` verb `PUT`
+        - arguments:
+            - cascade: boolean
+        - `Semantics: submits a report resolution request to the API, which marks the report as solved, this kind of report concerns animal abuse or similar issues, if found genuine the curator would contact the authorities, then resolve the report, it will be updated as solved in the reports table but not deleted. If cascade is true then all other reports about the same wildlife entry will be resolved as well. This resource is only available to curators; if the Session belongs to a user, the return status would be 403 Forbidden.`
+        """
         reportid = int(reportid)
         for idx, container in enumerate([request.form, request.json, request.args]):
             if len(container) > 0 and 'cascade' in container:
@@ -447,6 +555,12 @@ class AuthReport(Resource):
     @login_required
     @has_role('curator')
     def delete(self, reportid):
+        """
+        - url `/auth/report/{reportid}` verb `DELETE`
+        - arguments:
+            - cascade: boolean
+        - `Semantics: submits a report deletion request to the API, which deletes the report from the reports table. If cascade is true then the wildlife entry will be deleted from the wildlife table as well; in that case all other reports associated with the entry will be deleted as well. This resource is only available to curators; if the Session belongs to a user, the return status would be 403 Forbidden.`
+        """
         for idx, container in enumerate([request.form, request.json, request.args]):
             if len(container) > 0 and 'cascade' in container:
                 cascade = json.loads(container.get('cascade').lower())

@@ -1,3 +1,5 @@
+"""provides database schema logic"""
+
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from flask_login import LoginManager
@@ -20,6 +22,17 @@ UsersRoles = db.Table(
 
 
 class Users(UserMixin, db.Model):
+    """
+    - attributes:  
+        - id: integer
+        - username: string
+        - password: string
+        - fullname: string
+        - website: string
+        - bio: string
+        - photo: blob
+        - roles: foreign key
+    """
     __tablename__ = 'users'
     id       = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
@@ -32,11 +45,28 @@ class Users(UserMixin, db.Model):
 
 
 class Roles(db.Model, AllowancesMixin):
+    """
+    - attributes:
+        - id: integer
+        - name: string
+    """
+    __tablename__ = 'roles'
     id     = db.Column(db.Integer, primary_key=True)
     name   = db.Column(db.String(255), nullable=False)
 
 
 class WildLife(db.Model):
+    """
+    - attributes:
+        - id: integer
+        - userid: integer
+        - species: string
+        - notes: string
+        - lon: float, longiture
+        - lat: float, latitude
+        - date: datetime
+        - photo: blob
+    """
     __tablename__ = 'wildlife'
     id         = db.Column(db.Integer, primary_key=True)
     userid     = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -50,6 +80,15 @@ class WildLife(db.Model):
 
 
 class Reports(db.Model):
+    """
+    - attributes:
+        - id: integer
+        - userid: integer
+        - wildlifeid: integer
+        - code: integer
+        - text: string
+        - resolved: boolean
+    """
     __tablename__ = 'reports'
     id         = db.Column(db.Integer, primary_key=True)
     userid     = db.Column(db.Integer, db.ForeignKey('roles.id'), nullable=True)
@@ -60,6 +99,11 @@ class Reports(db.Model):
 
 
 class ReportCodes(db.Model):
+    """
+    - attributes:
+        - id: integer
+        - name: string
+    """
     __tablename__ = 'reportcodes'
     id         = db.Column(db.Integer, primary_key=True)
     name       = db.Column(db.String(300), nullable=False)
@@ -73,4 +117,5 @@ def insert_order_to_printer(mapper, connection, target):
 
 @login_manager.user_loader
 def get_id(user_id):
+    """loads a specific user from Users table"""
     return Users.query.get(int(user_id))
