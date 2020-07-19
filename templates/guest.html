@@ -45,6 +45,16 @@
     <script src="/static/js/header.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/nav.js"></script>
+    <script>
+      var ua = window.navigator.userAgent;
+      var msie = ua.indexOf("MSIE ");
+      if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+        window.location.href = '/ie';
+      }
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/noscript" />
+    </noscript>
   </head>
   <body class="body-app">
     <p hidden id="url">/guest</p>
@@ -91,13 +101,15 @@
                   9,
                   13,
                 ],
-                x: true
+                x: true,
               });
             </script>
           </form>
         </div>
         <div class="command spacy">
-          <a href="#" id="downloadall"><i class="fas fa-download whitefront"></i></a>
+          <a href="#" id="downloadall"
+            ><i class="fas fa-download whitefront"></i
+          ></a>
           <a href="#filters" rel="modal:open">
             <i class="fas fa-filter whitefront"></i>
           </a>
@@ -113,7 +125,7 @@
                   style="width: 100%;"
                 />
               </div>
-              <a href="#" class="add_marker"  hidden>
+              <a href="#" class="add_marker" hidden>
                 {{wildlife.center}}
               </a>
               <div class="wildlife-distance">
@@ -136,8 +148,8 @@
                 <form class="form" onsubmit="submit_report(event)">
                   <h4>Submit Report</h4>
                   <select name="code" placeholder="type">
-                    <option value=1>Animal Abuse</option>
-                    <option value=0>Forest Fire</option>
+                    <option value="1">Animal Abuse</option>
+                    <option value="0">Forest Fire</option>
                   </select>
                   <input
                     type="text"
@@ -146,8 +158,15 @@
                     placeholder="notes"
                     autocomplete="off"
                   />
-                  <input type="number" name="wildlifeid" hidden value="{{wildlife.id}}"/>
-                  <a href="#" rel="modal:close" id="closereport" hidden>Close</a>
+                  <input
+                    type="number"
+                    name="wildlifeid"
+                    hidden
+                    value="{{wildlife.id}}"
+                  />
+                  <a href="#" rel="modal:close" id="closereport" hidden
+                    >Close</a
+                  >
                   <br />
                   <button type="submit" class="report-button">
                     <i class="fas fa-paper-plane report-button-i"></i>

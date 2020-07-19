@@ -50,6 +50,16 @@
     <script src="/static/js/header.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/nav.js"></script>
+    <script>
+      var ua = window.navigator.userAgent;
+      var msie = ua.indexOf("MSIE ");
+      if (msie > 0 || !!navigator.userAgent.match(/Trident.*rv\:11\./)) {
+        window.location.href = '/ie';
+      }
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=/noscript">
+    </noscript>
   </head>
   <body class="body-app">
     <p hidden id="url">/curator</p>

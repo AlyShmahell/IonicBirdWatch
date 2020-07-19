@@ -1,6 +1,6 @@
 markers = [];
 
-function add_point(map, center, icon, pos) {
+function add_point(map, center, icon, crosshairs) {
 
   for (var i = 0; i < center.length; i++) {
     center[i] = Number(center[i]),
@@ -22,7 +22,7 @@ function add_point(map, center, icon, pos) {
       features: [iconFeature]
     })
   });
-  if (!pos)
+  if (!crosshairs)
     markers.push(layer);
   map.addLayer(layer);
   return geometry;
