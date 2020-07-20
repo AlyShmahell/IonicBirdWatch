@@ -8,6 +8,7 @@ import { SQLiteProvider } from './sqlite.provider';
 import axios from 'axios';
 import { ToastController } from '@ionic/angular';
 import { EventEmitterService } from './event.service';
+import { Router } from "@angular/router";
 
 
 
@@ -58,7 +59,7 @@ export class EntitiesComponent implements OnInit {
   items$: Observable<Item[]>;
   filters: any;
   entitiesdisabled = false;
-  constructor(private db: SQLiteProvider, public toastController: ToastController, private ees: EventEmitterService) { }
+  constructor(private db: SQLiteProvider, public toastController: ToastController, private ees: EventEmitterService, private router: Router) { }
   ngOnInit() {
     this.ees.emit('entities');
     this.requestdata();
@@ -104,6 +105,7 @@ export class EntitiesComponent implements OnInit {
           ).catch(
             async (err) => {
               await this.toast("not logged in", "red");
+              this.router.navigate(["signin"]);
             }
           )
         }

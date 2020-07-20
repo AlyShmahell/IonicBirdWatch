@@ -3,6 +3,7 @@ import { MenuController } from '@ionic/angular';
 import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
+import { Router } from "@angular/router";
 
 
 @Component({
@@ -18,7 +19,7 @@ import axios from 'axios';
 
 
 export class AppMenu {
-  constructor(private menu: MenuController, public toastController: ToastController) {
+  constructor(private menu: MenuController, public toastController: ToastController, private router: Router) {
   }
   async openMenu() {
     if (! await this.menu.isEnabled()){
@@ -64,6 +65,7 @@ export class AppMenu {
     ).catch(
       async (err) => {
         await this.toast("was not logged in", "red");
+        this.router.navigate(["signin"]);
       }
     )
   }
