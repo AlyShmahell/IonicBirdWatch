@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
 import { Router } from "@angular/router";
+import { SQLiteProvider } from './sqlite.provider';
 
 
 @Component({
@@ -19,28 +20,29 @@ import { Router } from "@angular/router";
 
 
 export class AppMenu {
-  constructor(private menu: MenuController, public toastController: ToastController, private router: Router) {
+  constructor(private menu: MenuController, public toastController: ToastController, private router: Router, private db: SQLiteProvider) {
   }
   async openMenu() {
-    if (! await this.menu.isEnabled()){
+    if (! await this.menu.isEnabled()) {
       this.menu.enable(true, 'menu');
     }
-    if (! await this.menu.isOpen()){
+    if (! await this.menu.isOpen()) {
       await this.menu.open();
     }
   }
   async closeMenu() {
-    if (await this.menu.isOpen())
-    {
+    if (await this.menu.isOpen()) {
       await this.menu.close()
     }
-    if (await this.menu.isEnabled())
-    {
+    if (await this.menu.isEnabled()) {
       await this.menu.enable(false);
     }
   }
   signout(event) {
     this.closeMenu();
+    (async () => {
+      await this.db.dbInstance.executeSql(`UPDATE auth SET status=false`);
+    })();
     var auth: any;
     axios.delete(
       `http://127.0.0.1:5001/auth`,
@@ -54,10 +56,10 @@ export class AppMenu {
         withCredentials: true
       }
     ).then(
-      async (resp)=>{
+      async (resp) => {
         auth = resp;
         if (auth.data.message != undefined) {
-          if (auth.data.message === "success"){
+          if (auth.data.message === "success") {
             await this.toast(auth.data.message, "green");
           }
         }
@@ -68,6 +70,8 @@ export class AppMenu {
         this.router.navigate(["signin"]);
       }
     )
+
+
   }
   async toast(message, color) {
     const toast = await this.toastController.create({

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { AuthGuardService } from "./guard.service";
 
 const routes: Routes = [
   {
@@ -8,15 +9,18 @@ const routes: Routes = [
   },
   {
     path: 'map',
-    loadChildren: () => import('./home.module').then(m => m.HomePageModule)
+    loadChildren: () => import('./home.module').then(m => m.HomePageModule),
+    canActivate: [AuthGuardService]
   },
   {
     path: 'camera',
-    loadChildren: () => import('./add.module').then(m => m.AddPageModule)
+    loadChildren: () => import('./add.module').then(m => m.AddPageModule),
+    canActivate: [AuthGuardService]
   },
   { 
     path: 'filters', 
-    loadChildren: () => import('./filters.module').then(m => m.FiltersPageModule) 
+    loadChildren: () => import('./filters.module').then(m => m.FiltersPageModule) ,
+    canActivate: [AuthGuardService]
   },
   {
     path: 'signin',
@@ -44,11 +48,13 @@ const routes: Routes = [
   },
   {
     path: 'profile',
-    loadChildren: () => import('./profile.module').then(m => m.ProfilePageModule)
+    loadChildren: () => import('./profile.module').then(m => m.ProfilePageModule),
+    canActivate: [AuthGuardService]
   },
   {
     path: 'manage',
-    loadChildren: () => import('./manage.module').then(m => m.ManagePageModule)
+    loadChildren: () => import('./manage.module').then(m => m.ManagePageModule),
+    canActivate: [AuthGuardService]
   },
 
 ];

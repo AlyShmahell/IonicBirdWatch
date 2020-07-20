@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { ToastController } from '@ionic/angular';
 import axios from 'axios';
 
+import { SQLiteProvider } from '../sqlite.provider';
+
 @Component({
   selector: 'app-signin',
   templateUrl: './signin.page.html',
@@ -12,7 +14,7 @@ export class SigninPage implements OnInit {
 
   signin = {};
   auth: any;
-  constructor(private router: Router, public toastController: ToastController) { }
+  constructor(private router: Router, public toastController: ToastController, private db: SQLiteProvider) { }
 
   ngOnInit() {
   }
@@ -35,6 +37,7 @@ export class SigninPage implements OnInit {
         if (this.auth.data.message != undefined) {
           if (this.auth.data.message === "success"){
             await this.toast(this.auth.data.message, "green");
+              await this.db.dbInstance.executeSql(`INSERT INTO auth (status) VALUES(true)`);
             this.router.navigate(['/map']);
           }
         }
