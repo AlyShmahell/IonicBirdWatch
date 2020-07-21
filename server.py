@@ -105,7 +105,7 @@ def logged_in(role=None):
         def wrapper(*args, **kwargs):
             if 'role' not in session:
                 return redirect(url_for('login'))
-            if session['role'] is not None:
+            elif session['role'] is not None:
                 value = func(*args, **kwargs)
                 return value
             else:
@@ -140,7 +140,12 @@ def welcome():
     - allocated logic for `/welcome`
     - returns:
         - renders `welcome.html` template
+    - guard:
+        - if 'role' in session: redirect to `curator` url
     """
+    if 'role' in session:
+        if session['role'] is not None:
+            return redirect(url_for('curator'))
     return render_template('welcome.html')
 
 
@@ -153,10 +158,15 @@ def login():
     - returns:
         - on success: redirects to `/curator`
         - on failure/`GET`: renders `login.html` template
+    - guard:
+        - if 'role' in session: redirect to `curator` url
     """
     if request.method == 'POST':
         status = login_user()
         if status:
+            return redirect(url_for('curator'))
+    if 'role' in session:
+        if session['role'] is not None:
             return redirect(url_for('curator'))
     return render_template('login.html')
 
@@ -262,7 +272,12 @@ def guest():
              renders `guest.html` template
         - on xhr/ajax:
              renders `guest-list.html` template
+    - guard:
+        - if 'role' in session: redirect to `curator` url
     """
+    if 'role' in session:
+        if session['role'] is not None:
+            return redirect(url_for('curator'))
     def flatten(d):
         return "&".join([f"{k}={v}" for k, v in d.items()])
     params = request.args.get('data')

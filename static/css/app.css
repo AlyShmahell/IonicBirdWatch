@@ -52,6 +52,7 @@
 }
 
 .button,
+.button-home,
 .card,
 .card-content {
     border-radius: 4px;
@@ -60,6 +61,12 @@
 .button {
     color: #a64d79;
     border-color: #a64d79;
+}
+
+.button-home {
+    color: white;
+    background-color: black;
+    text-decoration: none;
 }
 
 html,

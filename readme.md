@@ -80,6 +80,28 @@ pip install -r requirements.txt
 ```sh
 python server.py --this_ip "127.0.0.1" --this_port 5002 --rest_ip "http://127.0.0.1" --rest_port 5001
 ```
+<div style="page-break-after: always;"></div>
+
+# Site Structure Diagram
+![](.readme/WebsiteStructureDiagram.png)
+
+<div style="page-break-after: always;"></div>
+
+# Layout Analysis:
+
+## Static Components:
+- **Header**
+- **Footer**
+- **Login Form**
+- **Button Images:** provided by fontawesome and from `/static/img`.
+
+## Dynamic Components:
+- **Header Title:** animated using animejs.
+- **Main Area:** includes a collapsable/expandable dynamic List Area and a dynamic Map Area.
+- **Map Area:** generated using OpenLayers API, includes dynamically generated Markers.
+- **List Area:** includes a dynamically generated list of Cards.
+- **Cards:** includes dynamically generated content using Jinja2.
+- **Markers:** on click they dynamically generate pop-up Cards.
 
 <div style="page-break-after: always;"></div>
 
@@ -189,6 +211,8 @@ welcome()
 - allocated logic for `/welcome`
 - returns:
     - renders `welcome.html` template
+- guard:
+    - if 'role' in session: redirect to `curator` url
 
 <a name="server.login"></a>
 ##### login
@@ -204,6 +228,8 @@ login()
 - returns:
     - on success: redirects to `/curator`
     - on failure/`GET`: renders `login.html` template
+- guard:
+    - if 'role' in session: redirect to `curator` url
 
 <a name="server.logout"></a>
 ##### logout
@@ -298,6 +324,8 @@ guest()
          renders `guest.html` template
     - on xhr/ajax:
          renders `guest-list.html` template
+- guard:
+    - if 'role' in session: redirect to `curator` url
 
 <div style="page-break-after: always;"></div>
 
