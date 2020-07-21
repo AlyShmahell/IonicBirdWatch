@@ -502,3 +502,14 @@ body {
 .slip-button-i {
     font-size: 150%;
 }
+
+.notifiction {
+    display: inline-block;
+    padding: 19px;
+    margin-bottom: 20px;
+    color: #161748;
+    background-color: #9ecaed;
+    border-color: #9ecaed;
+    border-radius: 10px;
+    box-shadow: 0 0 20px #9ecaed;
+  }

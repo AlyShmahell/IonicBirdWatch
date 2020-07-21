@@ -291,9 +291,11 @@ function resolve_report(event) {
   $.ajax({
     url: "/report-resolve/" + id,
     type: "put",
-    data: data
+    data: data,
+    success:function(data) {
+      $('#closereport').trigger('click'); 
+    }
   });
-  $('#closereport').trigger('click');
 }
 
 function remove_report(event) {
@@ -305,7 +307,9 @@ function remove_report(event) {
   $.ajax({
     url: "/report-remove/" + id,
     type: "delete",
-    data: data
+    data: data,
+    success:function(data) {
+      $('#closereport').trigger('click'); 
+    }
   });
-  $('#closereport').trigger('click');
 }

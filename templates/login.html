@@ -46,6 +46,11 @@
       </h1>
     </div>
     <form class="login bullseye" action="#" method="POST">
+      {% with messages = get_flashed_messages() %} {% if messages %}
+      <div class="notifiction">
+        {{ messages[0] }}
+      </div>
+      {% endif %} {% endwith %}
       <input
         type="text"
         name="username"
@@ -63,7 +68,7 @@
         onblur="this.placeholder = 'password'"
       />
       <input type="submit" name="submit" value="Login" />
-      <a href="/welcome" class=" fas fa-home button-home"></a>
+      <a href="/welcome" class="fas fa-home button-home"></a>
     </form>
     <div class="footer bullseye">
       <p>Copyrights &copy; 2020 Aly Shmahell</p>

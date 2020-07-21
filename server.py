@@ -1,7 +1,7 @@
 import os, time, json, re
 from io import BytesIO
 import zipfile
-from flask import Flask, session, redirect, url_for, request, render_template, send_from_directory, make_response, send_file
+from flask import Flask, session, redirect, url_for, request, render_template, send_from_directory, make_response, send_file, flash
 import requests
 import argparse
 import functools
@@ -165,6 +165,8 @@ def login():
         status = login_user()
         if status:
             return redirect(url_for('curator'))
+        else:
+            flash('wrong credentials.')
     if 'role' in session:
         if session['role'] is not None:
             return redirect(url_for('curator'))
@@ -200,6 +202,15 @@ def ie():
     - semantics: graceful degredation in case of running on Internet Explored
     """
     return render_template('ie.html')
+
+@app.route('/noresponse')
+def noresponse():
+    """
+    - allocated logic for `/noresponse`
+    - returns: renders `noresponse.html` template
+    - semantics: graceful degredation in case of loss of connection to the rest server
+    """
+    return render_template('noresponse.html')
 
 
 @app.route('/curator')
@@ -237,8 +248,12 @@ def curator():
         lat = params['lat']
         params = flatten(params)
         headers = {"Content-Type": "application/json"}
-        response = SessionSingleton().sess.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params, headers=headers)
-        wildlife = response.json()['data']
+        try:
+            response = SessionSingleton().sess.get(f'{args.rest_ip}:{args.rest_port}/auth/wildlife', params = params, headers=headers)
+            wildlife = response.json()['data']
+        except:
+            logout_user()
+            return  render_template('noresponse.html')
         for entry in wildlife:        
             entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
             if entry['distance'] > 1000:
@@ -292,8 +307,12 @@ def guest():
         lat = params['lat']
         params = flatten(params)
         headers = {"Content-Type": "application/json"}
-        response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
-        wildlife = response.json()['data']
+        try:
+            response = requests.get(f'{args.rest_ip}:{args.rest_port}/guest/wildlife', params = params, headers=headers)
+            wildlife = response.json()['data']
+        except:
+            logout_user()
+            return  render_template('noresponse.html')
         for entry in wildlife:        
             entry['distance'] = calc_distance(entry['lon'], entry['lat'], lon, lat)
             if entry['distance'] > 1000:

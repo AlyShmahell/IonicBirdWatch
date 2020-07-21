@@ -271,6 +271,19 @@ ie()
 - returns: renders `ie.html` template
 - semantics: graceful degredation in case of running on Internet Explorer
 
+<a name="server.noresponse"></a>
+
+##### noresponse
+
+```python
+@app.route('/noresponse')
+noresponse()
+```
+
+- allocated logic for `/noresponse`
+- returns: renders `noresponse.html` template
+- semantics: graceful degredation in case of loss of connection to the rest server
+
 <div style="page-break-after: always;"></div>
 
 <a name="server.curator"></a>
