@@ -481,6 +481,8 @@ def sqlitext(app)
 
 - loads sqlite extenstions into flask_sqlalchemy
 
+<div style="page-break-after: always;"></div>
+
 <a name="image"></a>
 ## Image: `image.py`
 
@@ -493,5 +495,19 @@ def img2base64(path)
 - a function that encodes an image file into base64
 - parameters:
     - path: path to image file
+- returns:
+    - base64 encoded image
+
+<a name="image.rand2img2base64"></a>
+##### rand2img2base64
+
+```python
+def rand2img2base64(x, y, z)
+```
+- a function that generates a random base64 image
+- parameters:
+    - x: length of the image over the x-axis
+    - y: length of the image over the y-axis
+    - z: length of the image over the z-axis
 - returns:
     - base64 encoded image
